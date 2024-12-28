@@ -1,0 +1,9 @@
+
+/home/runner/work/exp-outage-probability-iiith/exp-outage-probability-iiith/experiment/simulation/js/main.js
+    2:10  warning  'openPart' is defined but never used    no-unused-vars
+   47:10  warning  'getOutput1' is defined but never used  no-unused-vars
+   77:10  warning  'getOutput2' is defined but never used  no-unused-vars
+  101:9   warning  'Chart' is not defined                  no-undef
+
+✖ 4 problems (0 errors, 4 warnings)
+
