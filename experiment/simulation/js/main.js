@@ -18,53 +18,67 @@ function startup() {
 
 window.onload = startup;
 
-// Implementation of the erf function
 
 function erf(x) {
+  
     var a1 = 0.254829592;
     var a2 = -0.284496736;
     var a3 = 1.421413741;
     var a4 = -1.453152027;
     var a5 = 1.061405429;
     var p = 0.3275911;
-  
-    var t = 1.0 / (1.0 + p * Math.abs(x));
+
+    // Save the sign of x
+    var sign = (x >= 0) ? 1 : -1;
+    x = Math.abs(x);
+
+    // Approximation of the error function
+    var t = 1.0 / (1.0 + p * x);
     var y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-  
-    if (x >= 0) {
-      return y;
-    } else {
-      return -y;
-    }
-  }
-  
- 
-  function Q_function(x, mu, sigma) {
-    return 0.5 * (1 + erf((x - mu) / (sigma * Math.sqrt(2))));
-  }
-  
-function getOutput1(){
+
+    return sign * y;
+}
+
+function Q_function(x){
+    return 0.5 * (1 - erf(x / Math.sqrt(2)));
+}
+
+function getOutput1() {
     const Pt = parseFloat(document.getElementById("Pt").value);
     const P_min = parseFloat(document.getElementById("P_min").value);
     const d = parseFloat(document.getElementById("d").value);
-    const fc = parseFloat(document.getElementById("fc").value);
-    let P_out_helper;
-    let lamda=3e8/fc;
-    P_out_helper=(10*Math.log10(Pt)+20*Math.log10(lamda/(4*Math.PI*d)));
-    // console.log(P_out_helper)
-    let P_out=1-Q_function((P_min-P_out_helper),0,1);
-    let coverage=1-P_out;
+    const freq = parseFloat(document.getElementById("fc").value);
+    const fc = freq * 1000000;
+
+    // Speed of light in m/s
+    const c = 3e8;
+
+    // Wavelength
+    const lambda = c / fc;
+
+    // Calculate received power in dB
+    let P_out_helper = 10 * Math.log10(Pt) + 20 * Math.log10(lambda / (4 * Math.PI * d));
+
+    // Calculate P_out
+    let P_out = Q_function((P_min - P_out_helper) / 1);
+
+    // Calculate coverage
+    let coverage = 1 - P_out;
+
+    // Display the results
     document.getElementById("observations").innerHTML = `
     <p><strong>P_out:</strong> ${P_out.toFixed(6)}</p>
     <p><strong>Coverage:</strong> ${coverage.toFixed(6)}</p>
    `;
 }
 
+
 function getOutput2() {
 
     const Pt = parseFloat(document.getElementById("Pt2").value);
     const P_min = parseFloat(document.getElementById("P_min2").value);
-    const fc = parseFloat(document.getElementById("fc2").value);
+      const freq = parseFloat(document.getElementById("fc2").value);
+    const fc=freq*1000000;
     let lamda=3e8/fc;
     const distances = [];
     const outage= [];
