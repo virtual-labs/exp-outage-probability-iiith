@@ -1,3 +1,4 @@
+//Your JavaScript goes in here
 function openPart(evt, name){
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");
