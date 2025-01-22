@@ -1,4 +1,3 @@
-# Theory
 In previous experiments, we explored fundamental concepts like pathloss and shadowing, which significantly influence wireless system design. In wireless communication, maintaining a minimum level of received power is crucial—for instance, ensuring cellular voice quality remains above a specific threshold. However, pathloss and shadowing introduce attenuation effects that impact received power. To effectively characterize this fading phenomenon, a comprehensive understanding of outage and coverage becomes essential. 
 
 ## Outage Probability, $P_{out}$
