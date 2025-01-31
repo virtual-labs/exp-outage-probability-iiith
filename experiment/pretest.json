@@ -13,7 +13,7 @@
         "a": "Outage is the probability that the received signal falls below a minimum threshold",
         "b": "Correct answer!",
         "c": "Outage is the probability that the received signal falls below a minimum threshold",
-        "d": "Outage is the probability that the received signal falls below a minimum threshold",
+        "d": "Outage is the probability that the received signal falls below a minimum threshold"
       },
       "correctAnswer": "b",
       "difficulty": "beginner"
@@ -47,7 +47,7 @@
         "a": "Outage depends on other factors too",
         "b": "Outage depends on other factors too",
         "c": "Correct answer!",
-        "d": "Outage depends on various factors like received power, distance between the transmitter and receiver, etc",
+        "d": "Outage depends on various factors like received power, distance between the transmitter and receiver, etc"
       },
       "correctAnswer": "c",
       "difficulty": "beginner"
@@ -64,7 +64,7 @@
         "a": "Cell with lower outage probability assures higher coverage",
         "b": "Correct answer!",
         "c": "Cell with lower outage probability assures higher coverage and thus does not experience dropped calls",
-        "d": "Cell with lower outage probability assures higher coverage and thus does not require extra transmitters",
+        "d": "Cell with lower outage probability assures higher coverage and thus does not require extra transmitters"
       },
       "correctAnswer": "b",
       "difficulty": "beginner"
