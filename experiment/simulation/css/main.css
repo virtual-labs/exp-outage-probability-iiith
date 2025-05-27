@@ -316,75 +316,7 @@ section .title{
   
 }
 
-/* ----------------------------------------- Plot Button -----------------------------------------------------*/
 
-.buttonTotal {
-  display: block;
-  margin-bottom: 40px;
-  font-size: 100%;
-  position: relative;
-  padding: 10px 20px;
-  background-color: #98CB3B;
-  color: #FFFFFF;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  margin-left: 0%;
-  margin-top: 10%;
-}
-
-.buttonTotal:hover {
-  background-color: #2C9AD1;
-  transform: scale(1.05);
-}
-
-/* ---------------------------------------------------- Tabs -------------------------------------------- */
-
-.tab {
-  overflow: hidden;
-  border: 1px solid #FFFFFF;
-  background-color: #FFFFFF;
-}
-
-/* Style the buttons inside the tab */
-.tab button {
-  background-color: inherit;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 14px 16px;
-  font-size: 17px;
-}
-
-/* Change background color of buttons on hover */
-.tab button:hover {
-  background-color: #ddd;
-}
-
-/* Create an active/current tablink class */
-.tab button.active {
-  background-color: #ccc;
-  border-style: solid;
-  border-radius: 10px;
-  border-color: #98CB3B;
-  color: #176696;
-}
-
-/* Style the tab content */
-.tabcontent {
-  display: none;
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-top: none;
-}
 
 /* ------------------------------------------ Table ------------------------------------ */
 
@@ -455,9 +387,8 @@ th{
       border: none;
       margin: 10px;
       border-radius: 15px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  
+
       overflow: auto; 
     }
 
@@ -470,7 +401,7 @@ th{
       justify-content: center;
       align-items: center;
       position: relative; 
-      padding: 15px; 
+      padding: 9px; 
     }
 
     h3 {
@@ -482,7 +413,7 @@ th{
       text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    .input-group {
+    .input-group{
       margin-bottom: 20px;
       padding: 15px;
       background: rgba(255, 255, 255, 0.8);
@@ -614,6 +545,7 @@ th{
       box-shadow: 0 5px 25px rgba(0,0,0,0.5);
       border: 1px solid rgba(255,255,255,0.15);
     }
+    
 
     .output-section {
       margin-bottom: 20px;
@@ -641,7 +573,7 @@ th{
     .legend-color { width: 20px; height: 20px; border-radius: 4px; margin-right: 10px; border: 1px solid #bdc3c7; flex-shrink: 0; }
 
     .instructions { font-size: 0.85em; color: #34495e; margin-top: 15px; padding: 12px; background: linear-gradient(135deg, #ecf0f1, #e0e6e8); border-radius: 8px; border-left: 4px solid #f39c12; line-height: 1.4; }
-    button { width: 90%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; margin-top: 15px; transition: all 0.3s ease; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+    button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; margin-top: 15px; transition: all 0.3s ease; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
     button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); filter: brightness(1.1); }
     .mode-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
     .mode-btn { padding: 8px 4px; margin: 0; font-size: 0.8em; border-radius: 6px; }
