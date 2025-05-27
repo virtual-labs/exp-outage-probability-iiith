@@ -2,37 +2,37 @@
   "version": 2.0,
   "questions": [
     {
-      "question": "This is a Sample Question 1?",
+      "question": "If the target minimum received power is -80 dBm, and the received power at a distance d is -75 dBm, what is the outage probability at this distance?",
       "answers": {
-        "a": "answer1",
-        "b": "answer2",
-        "c": "answer3",
-        "d": "answer4"
+        "a": "1",
+        "b": "0",
+        "c": "0.75",
+        "d": "1.25"
       },
       "explanations": {
-        "a": "Explanation 1  <a href='www.google.com'>here</a>",
-        "b": "Explanation 2",
-        "c": "Explanation 2",
-        "d": "Explanation 2"
+        "a": "No outage occurs because $P_r > P_{min}$",
+        "b": "Correct answer!",
+        "c": "No outage occurs because $P_r > P_{min}$",
+        "d": "Probability cannot be greater than 1"
       },
-      "correctAnswer": "a",
+      "correctAnswer": "b",
       "difficulty": "beginner"
     },
     {
-      "question": "This is a Sample Question 2?",
+      "question": "A receiver at distance d=1 km experiences a pathloss of 80 dBm. If the transmitter power is 35 dBm and the target minimum power is -45 dBm, does this receiver experience an outage?",
       "answers": {
-        "a": "answer1",
-        "b": "answer2",
-        "c": "answer3",
-        "d": "answer4"
+        "a": "Yes",
+        "b": "No",
+        "c": "May be",
+        "d": "Insufficient information"
       },
       "explanations": {
-        "a": "Explanation 1  <a href='www.google.com'>here</a>",
-        "b": "Explanation 2",
-        "c": "Explanation 2",
-        "d": "Explanation 2"
+        "a": "Correct answer!",
+        "b": "Received power is 35-80=45dBm which is equal to the threshold",
+        "c": "Received power is 35-80=45dBm which is equal to the threshold",
+        "d": "Received power is 35-80=45dBm which is equal to the threshold"
       },
-      "correctAnswer": "c",
+      "correctAnswer": "a",
       "difficulty": "beginner"
     }
   ]
