@@ -13,35 +13,55 @@
 </head>
 <body>
 	<div class="columns is-centered">
-		<div class="column is-one-quarter v-instruction-title">
-			Tasks
-		</div>
 		<div class="column">
-			<div class="tab">
-				<button class="tablinks" onclick="openPart(event, 'task1')" , id="default">Advanced Shadowing and Outage Probability</button>
-	
-			</div>
-		</div>
-	</div>
-
-	<div id="task1" class="tabcontent">
-		<section class="fre" id="TASK1">
-			<div class="max-width">
+			<section class="fre" id="TASK1">
+				<div class="max-width">
 				<h2 class="title">Outage calculation</h2>
 				<div class="columns is-centered">
 					<div class="v-collapsible-instruction-container v-instruction-container" style="margin-top: 2%;">
 						<div class="v-collapsible is-size-5">Instructions</div>
-						<div class="v-content" style="text-align: left; padding-left: 10%; padding-right: 10%;">
-							<h3> <b> To understand outage and coverage, follow these steps: </b> </h3>
-							<br>
-							<h3>
-								<ol>
-									<li> Enter the inputs Total transmit power, minimum power threshold, distance between transmitter and reciever, and carrier frequency. </li>
-									<li> Click on calculate and observe the probabilities of coverage and outage.</li>
-									<li> Repeat the same for different values of inputs.</li>
-								</ol>
-							</h3>
-							<br>
+						<div class="v-content" style="text-align: left; padding: 0 10%;">
+							<h3 class="mb-3"><b>Exploring Outage Probability & Coverage</b></h3>
+							
+							<div class="instruction-step">
+							
+								<div class="step-content">
+									<strong>Configure Parameters:</strong> Adjust the transmitter power, frequency, and environment settings in the left panel.
+								</div>
+							</div>
+							
+							<div class="instruction-step">
+				
+								<div class="step-content">
+									<strong>Add Obstacles:</strong> Click on the grid to place obstacles that will block signal propagation.
+									<ul class="mt-2">
+										<li>Use "Normal" mode for typical buildings</li>
+										<li>Use "Heavy" mode for dense structures</li>
+										<li>Use "Erase" to remove obstacles</li>
+									</ul>
+								</div>
+							</div>
+							
+							<div class="instruction-step">
+
+								<div class="step-content">
+									<strong>Analyze Results:</strong> Observe how obstacles affect signal strength and coverage:
+									<ul class="mt-2">
+										<li>Red-outlined cells indicate outage areas</li>
+										<li>Lightly shaded cells show shadowing effects</li>
+										<li>Hover over any cell to see detailed signal information</li>
+									</ul>
+								</div>
+							</div>
+							
+							<div class="instruction-step">
+							
+								<div class="step-content">
+									<strong>Experiment:</strong> Try different environments, obstacle patterns, and transmitter settings to understand how they affect outage probability.
+								</div>
+							</div>
+							
+							<p class="mt-4 has-text-centered"><i>Tip: Use the "Random Obstacles" button to quickly generate a realistic environment.</i></p>
 						</div>
 					</div>
 				</div>
@@ -57,8 +77,13 @@
 									<!-- Path Loss Exponent and Shadow Fading Std Dev Inputs REMOVED -->
 									<div class="input-group"> <label>🖱️ Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
 									<button onclick="clearAll()">🗑️ Clear All Obstacles</button> <button onclick="randomObstacles()">🎲 Random Obstacles</button>
-									<div class="instructions"> <strong>📋 Instructions:</strong><br> • Yellow circle = Transmitter<br> • Click cells to place obstacles<br> • Red outlined cells = Outage<br> • Tinged cells = Shadowed by obstacle<br> • Hover for detailed cell info<br> • Adjust parameters to see effects </div>
-									<div class="legend"> <h4>🎨 Legend</h4> <div class="legend-item"> <div class="legend-color" style="background: radial-gradient(circle, #ffeb3b, #ff9800); border-radius: 50%;"></div> <span>Transmitter</span> </div>     <!-- ... other legend items ... -->
+							
+						</div>
+					</div>
+					<div class="center-column box">
+					
+							<div id="simulation"> <div class="grid-container" id="grid-container"></div> </div>
+            	<div class="legend"> <h4>🎨 Legend</h4> <div class="legend-item"> <div class="legend-color" style="background: radial-gradient(circle, #ffeb3b, #ff9800); border-radius: 50%;"></div> <span>Transmitter</span> </div>     <!-- ... other legend items ... -->
 									<div class="legend-item"> 
 											<div class="legend-color" style="background: linear-gradient(45deg, #555, #777);"></div> 
 											<!-- MODIFIED Legend Text -->
@@ -71,12 +96,6 @@
 									</div>
 									<!-- ... other legend items ... --> <div class="legend-item"> <div class="legend-color" style="background: #00ff00;"></div> <span>Strong Signal (>-60dBm)</span> </div> <div class="legend-item"> <div class="legend-color" style="background: #ffff00;"></div> <span>Medium Signal (-60 to -80dBm)</span> </div> <div class="legend-item"> <div class="legend-color" style="background: #ff0000;"></div> <span>Weak Signal (<-80dBm)</span> </div> <div class="legend-item"> <div class="legend-color" style="box-shadow: inset 0 0 0 1px #dd0033;"></div> <span>Outage Indication</span> </div> <div class="legend-item"> <div class="legend-color" style="background-color: rgba(0,0,0,0.15); border: 1px dashed #555;"></div> <span>Shadowed Cell (Tinge)</span> </div> </div>
 				
-						</div>
-					</div>
-					<div class="center-column box">
-					
-							<div id="simulation"> <div class="grid-container" id="grid-container"></div> </div>
-
 
 					</div>
 					<div class="right-column box">
