@@ -18,8 +18,8 @@
 		</div>
 		<div class="column">
 			<div class="tab">
-				<button class="tablinks" onclick="openPart(event, 'task1')" , id="default">Outage</button>
-				<button class="tablinks" onclick="openPart(event, 'task2')">Outage vs distance</button>
+				<button class="tablinks" onclick="openPart(event, 'task1')" , id="default">Advanced Shadowing and Outage Probability</button>
+	
 			</div>
 		</div>
 	</div>
@@ -45,111 +45,59 @@
 				</div>
 				<div class="columns-container">
 					<div class="left-column box">
-						<div class="columns is-centered is-flex-direction-row is-flex-wrap-wrap is-align-content-start"
-							style="margin-top:-1.5%">
-							<div class="column is-2-desktop is-4-tablet is-10-mobile">
-								<div class="box-question">
-									<div class="fill1">
-										Total_transmit_power(Pt) <input type="number" id="Pt">
+				
+							  <div id="inputs">
+									<h3>🎛️ System Parameters</h3>
+									<div class="input-group"> <label for="setting">📡 Environment Type:</label> <select id="setting"> <option value="urban">Urban (High Interference)</option> <option value="suburban">Suburban (Medium)</option> <option value="rural">Rural (Low Interference)</option> </select> </div>
+									<div class="input-group"> <label for="Pt">🔋 Transmitter Power (dBm):</label> <input type="number" id="Pt" value="30" min="0" max="50" step="1"> </div>
+									<div class="input-group"> <label for="Pmin">📶 Min Required Power (dBm):</label> <input type="number" id="Pmin" value="-85" min="-120" max="-50" step="1"> </div>
+									<div class="input-group"> <label for="frequency">📻 Frequency (MHz):</label> <input type="number" id="frequency" value="900" min="400" max="6000" step="50"> </div>
+									<!-- Path Loss Exponent and Shadow Fading Std Dev Inputs REMOVED -->
+									<div class="input-group"> <label>🖱️ Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
+									<button onclick="clearAll()">🗑️ Clear All Obstacles</button> <button onclick="randomObstacles()">🎲 Random Obstacles</button>
+									<div class="instructions"> <strong>📋 Instructions:</strong><br> • Yellow circle = Transmitter<br> • Click cells to place obstacles<br> • Red outlined cells = Outage<br> • Tinged cells = Shadowed by obstacle<br> • Hover for detailed cell info<br> • Adjust parameters to see effects </div>
+									<div class="legend"> <h4>🎨 Legend</h4> <div class="legend-item"> <div class="legend-color" style="background: radial-gradient(circle, #ffeb3b, #ff9800); border-radius: 50%;"></div> <span>Transmitter</span> </div>     <!-- ... other legend items ... -->
+									<div class="legend-item"> 
+											<div class="legend-color" style="background: linear-gradient(45deg, #555, #777);"></div> 
+											<!-- MODIFIED Legend Text -->
+											<span>Normal Obstacle (18dB Max Shadow)</span> 
+									</div> 
+									<div class="legend-item"> 
+											<div class="legend-color" style="background: linear-gradient(45deg, #7A0000, #C01030);"></div> 
+											<!-- MODIFIED Legend Text -->
+											<span>Heavy Obstacle (35dB Max Shadow)</span> 
 									</div>
-									<div class="fill1">
-										Threshold_power(P_min)) <input type="number" id="P_min" step="0.1">
-									</div>
-									<div class="fill1">
-										distance/shell_radius(d) <input type="number" id="d" step="0.1">
-									</div>
-									<div class="fill1">
-										frequency(fc in Mhz) <input type="number" id="fc" step="0.1">
-									</div>
-									<button class="buttonTotal" id="calculateButton" role="button"
-										onClick="getOutput1()">Calculate</button>
-								
-								</div>
-							</div>
+									<!-- ... other legend items ... --> <div class="legend-item"> <div class="legend-color" style="background: #00ff00;"></div> <span>Strong Signal (>-60dBm)</span> </div> <div class="legend-item"> <div class="legend-color" style="background: #ffff00;"></div> <span>Medium Signal (-60 to -80dBm)</span> </div> <div class="legend-item"> <div class="legend-color" style="background: #ff0000;"></div> <span>Weak Signal (<-80dBm)</span> </div> <div class="legend-item"> <div class="legend-color" style="box-shadow: inset 0 0 0 1px #dd0033;"></div> <span>Outage Indication</span> </div> <div class="legend-item"> <div class="legend-color" style="background-color: rgba(0,0,0,0.15); border: 1px dashed #555;"></div> <span>Shadowed Cell (Tinge)</span> </div> </div>
+				
 						</div>
 					</div>
 					<div class="center-column box">
-						<div class="column is-7-desktop is-10-tablet is-10-mobile">
-							<img id="imageDisplay" src="./images/exp.png" alt="Image">
-						</div>
+					
+							<div id="simulation"> <div class="grid-container" id="grid-container"></div> </div>
+
+
 					</div>
 					<div class="right-column box">
-						<div class="column is-3-desktop is-10-tablet is-5-mobile">
-							<div class="box-question">
-								<div class="v-datalist-title">Observations</div>
-								<div id="observations">
+						
+							<div id="outputs">
+								<h3>📊 Results & Analysis</h3>
+								<div class="output-section"> <h4>🎯 Coverage Metrics</h4> <div class="metric"> <span class="metric-label">Outage Probability:</span> <span class="metric-value" id="outageProb">0.00%</span> </div> <div class="progress-bar"> <div class="progress-fill" id="outageProgress" style="width: 0%;"></div> </div> <div class="metric"> <span class="metric-label">Coverage Area:</span> <span class="metric-value" id="coverageArea">100.00%</span> </div> <div class="metric"> <span class="metric-label">Cells in Outage:</span> <span class="metric-value" id="outageCells">0 / 929</span> </div> </div>
+								<div class="output-section"> <h4>📡 Signal Analysis</h4> <div class="metric"> <span class="metric-label">Avg Rx Power (Covered):</span> <span class="metric-value" id="avgReceivedPower">0.00 dBm</span> </div> <div class="metric"> <span class="metric-label">Min Rx Power (Covered):</span> <span class="metric-value" id="minReceivedPower">0.00 dBm</span> </div> <div class="metric"> <span class="metric-label">Max Rx Power (Covered):</span> <span class="metric-value" id="maxReceivedPower">0.00 dBm</span> </div> <div class="metric"> <span class="metric-label">Signal Dynamic Range:</span> <span class="metric-value" id="signalRange">0.00 dB</span> </div> </div>
+								<div class="output-section"> <h4>🌐 Path Loss Analysis</h4> <div class="metric"> <span class="metric-label">Avg Total Path Loss:</span> <span class="metric-value" id="avgPathloss">0.00 dB</span> </div>
+									<!-- Avg Shadow Loss (Obstacle + Random) changed to Avg Obstacle Shadow (dB) -->
+									<div class="metric"> <span class="metric-label">Avg Obstacle Shadow (dB):</span> <span class="metric-value" id="avgShadowLoss">0.00 dB</span> </div> 
+									<div class="metric"> <span class="metric-label">Max Coverage Distance:</span> <span class="metric-value" id="maxDistance">0.00 km</span> </div> </div>
+								<div class="output-section"> <h4>🏢 Environment Impact</h4> <div class="metric"> <span class="metric-label">Environment Factor:</span> <span class="metric-value" id="envFactor">Urban</span> </div> <div class="metric"> <span class="metric-label">Obstacle Count:</span> <span class="metric-value" id="obstacleCount">0</span> </div>
+									<!-- Shadowing Factor (from Std) changed to Shadowing Model -->
+									<div class="metric"> <span class="metric-label">Shadowing Model:</span> <span class="metric-value" id="shadowingFactor">Obstacle-based</span> </div> 
 								</div>
+								<div class="status-indicator" id="systemStatus"> System Status: Excellent Coverage </div>
 							</div>
 						</div>
-					</div>
+		
 				</div>
 			</div>
 		</section>
-	</div>
-
-	<div id="task2" class="tabcontent">
-		<section class="fre" id="TASK2">
-			<div class="max-width">
-				<h2 class="title">Outage vs Distance</h2>
-				<div class="columns is-centered">
-					<div class="v-collapsible-instruction-container v-instruction-container" style="margin-top: 2%;">
-						<div class="v-collapsible is-size-5">Instructions</div>
-						<div class="v-content" style="text-align: left; padding-left: 10%; padding-right: 10%;">
-							<h3><b>To understand the outage vs distance follow these steps:</b></h3>
-							<br>
-							<h3>
-								<ol>
-									<li> test</li>
-								</ol>
-							</h3>
-							<br>
-						</div>
-					</div>
-				</div>
-				<div class="columns-container">
-					<div class="left-column box">
-						<div class="columns is-centered is-flex-direction-row is-flex-wrap-wrap is-align-content-start"
-							style="margin-top:-1.5%">
-							<div class="column is-2-desktop is-4-tablet is-10-mobile">
-								<div class="box-question">
-									<div class="fill1">
-										Total_transmit_power(Pt) <input type="number" id="Pt2">
-									</div>
-									<div class="fill1">
-										Threshold_power(P_min)) <input type="number" id="P_min2" step="0.1">
-									</div>
-									<div class="fill1">
-										frequency(fc in Mhz) <input type="number" id="fc2" step="0.1">
-									</div>
-
-									<button class="buttonTotal" id="calculateButton2" role="button"
-										onClick="getOutput2()">Calculate</button>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="center-column box">
-						<div class="column is-7-desktop is-10-tablet is-10-mobile">
-							<img id="imageDisplay2" src="./images/exp.png" alt="Image">
-						</div>
-					</div>
-
-					<div class="right-column box">
-						<div class="column is-3-desktop is-10-tablet is-5-mobile">
-							<div class="box-question">
-								<div class="v-datalist-title">Observations</div>
-								<div id="observations2">
-									<canvas id="outage_chart"></canvas>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<script src="js/jsplumb.bundle.js"></script>
-				<script src="https://cdn.jsdelivr.net/gh/virtual-labs/virtual-style@0.0.8-b/js/script.js"></script>
-				<script type="module" src="js/main.js"></script>
-			</div>
 	</div>
 	</section>
 	</div>
