@@ -19,49 +19,51 @@
 				<h2 class="title">Outage calculation</h2>
 				<div class="columns is-centered">
 					<div class="v-collapsible-instruction-container v-instruction-container" style="margin-top: 2%;">
-						<div class="v-collapsible is-size-5">Instructions</div>
+						<div class="v-collapsible is-size-5">📋 Instructions</div>
 						<div class="v-content" style="text-align: left; padding: 0 10%;">
-							<h3 class="mb-3"><b>Exploring Outage Probability & Coverage</b></h3>
+							<h3 class="mb-3"><b>🔍 Exploring Outage Probability & Coverage</b></h3>
 							
-							<div class="instruction-step">
-							
+							<div class="instruction-step card p-3 mb-3">
 								<div class="step-content">
+									<span class="step-icon">⚙️</span>
 									<strong>Configure Parameters:</strong> Adjust the transmitter power, frequency, and environment settings in the left panel.
 								</div>
 							</div>
 							
-							<div class="instruction-step">
-				
+							<div class="instruction-step card p-3 mb-3">
 								<div class="step-content">
+									<span class="step-icon">🏢</span>
 									<strong>Add Obstacles:</strong> Click on the grid to place obstacles that will block signal propagation.
 									<ul class="mt-2">
-										<li>Use "Normal" mode for typical buildings</li>
-										<li>Use "Heavy" mode for dense structures</li>
-										<li>Use "Erase" to remove obstacles</li>
+										<li>🔶 Use "Normal" mode for typical buildings</li>
+										<li>🔴 Use "Heavy" mode for dense structures</li>
+										<li>🧹 Use "Erase" to remove obstacles</li>
 									</ul>
 								</div>
 							</div>
 							
-							<div class="instruction-step">
-
+							<div class="instruction-step card p-3 mb-3">
 								<div class="step-content">
+									<span class="step-icon">📊</span>
 									<strong>Analyze Results:</strong> Observe how obstacles affect signal strength and coverage:
 									<ul class="mt-2">
-										<li>Red-outlined cells indicate outage areas</li>
-										<li>Lightly shaded cells show shadowing effects</li>
-										<li>Hover over any cell to see detailed signal information</li>
+										<li>🔺 Red-outlined cells indicate outage areas</li>
+										<li>🌫️ Lightly shaded cells show shadowing effects</li>
+										<li>🔍 Hover over any cell to see detailed signal information</li>
 									</ul>
 								</div>
 							</div>
 							
-							<div class="instruction-step">
-							
+							<div class="instruction-step card p-3 mb-3">
 								<div class="step-content">
+									<span class="step-icon">🧪</span>
 									<strong>Experiment:</strong> Try different environments, obstacle patterns, and transmitter settings to understand how they affect outage probability.
 								</div>
 							</div>
 							
-							<p class="mt-4 has-text-centered"><i>Tip: Use the "Random Obstacles" button to quickly generate a realistic environment.</i></p>
+							<div class="alert alert-info mt-4 p-3">
+								<p class="mt-1 has-text-centered"><i>💡 Tip: Use the "Random Obstacles" button to quickly generate a realistic environment.</i></p>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -102,17 +104,86 @@
 						
 							<div id="outputs">
 								<h3>📊 Results & Analysis</h3>
-								<div class="output-section"> <h4>🎯 Coverage Metrics</h4> <div class="metric"> <span class="metric-label">Outage Probability:</span> <span class="metric-value" id="outageProb">0.00%</span> </div> <div class="progress-bar"> <div class="progress-fill" id="outageProgress" style="width: 0%;"></div> </div> <div class="metric"> <span class="metric-label">Coverage Area:</span> <span class="metric-value" id="coverageArea">100.00%</span> </div> <div class="metric"> <span class="metric-label">Cells in Outage:</span> <span class="metric-value" id="outageCells">0 / 929</span> </div> </div>
-								<div class="output-section"> <h4>📡 Signal Analysis</h4> <div class="metric"> <span class="metric-label">Avg Rx Power (Covered):</span> <span class="metric-value" id="avgReceivedPower">0.00 dBm</span> </div> <div class="metric"> <span class="metric-label">Min Rx Power (Covered):</span> <span class="metric-value" id="minReceivedPower">0.00 dBm</span> </div> <div class="metric"> <span class="metric-label">Max Rx Power (Covered):</span> <span class="metric-value" id="maxReceivedPower">0.00 dBm</span> </div> <div class="metric"> <span class="metric-label">Signal Dynamic Range:</span> <span class="metric-value" id="signalRange">0.00 dB</span> </div> </div>
-								<div class="output-section"> <h4>🌐 Path Loss Analysis</h4> <div class="metric"> <span class="metric-label">Avg Total Path Loss:</span> <span class="metric-value" id="avgPathloss">0.00 dB</span> </div>
-									<!-- Avg Shadow Loss (Obstacle + Random) changed to Avg Obstacle Shadow (dB) -->
-									<div class="metric"> <span class="metric-label">Avg Obstacle Shadow (dB):</span> <span class="metric-value" id="avgShadowLoss">0.00 dB</span> </div> 
-									<div class="metric"> <span class="metric-label">Max Coverage Distance:</span> <span class="metric-value" id="maxDistance">0.00 km</span> </div> </div>
-								<div class="output-section"> <h4>🏢 Environment Impact</h4> <div class="metric"> <span class="metric-label">Environment Factor:</span> <span class="metric-value" id="envFactor">Urban</span> </div> <div class="metric"> <span class="metric-label">Obstacle Count:</span> <span class="metric-value" id="obstacleCount">0</span> </div>
-									<!-- Shadowing Factor (from Std) changed to Shadowing Model -->
-									<div class="metric"> <span class="metric-label">Shadowing Model:</span> <span class="metric-value" id="shadowingFactor">Obstacle-based</span> </div> 
+								
+								<!-- Coverage Metrics Section -->
+								<div class="output-section">
+									<h4>🎯 Coverage Metrics</h4>
+									<div class="metric">
+										<span class="metric-label">Outage Probability:</span>
+										<span class="metric-value" id="outageProb">0.00%</span>
+									</div>
+									<div class="progress-bar">
+										<div class="progress-fill" id="outageProgress" style="width: 0%;"></div>
+									</div>
+									<div class="metric">
+										<span class="metric-label">Coverage Area:</span>
+										<span class="metric-value" id="coverageArea">100.00%</span>
+									</div>
+									<div class="metric">
+										<span class="metric-label">Cells in Outage:</span>
+										<span class="metric-value" id="outageCells">0 / 929</span>
+									</div>
 								</div>
-								<div class="status-indicator" id="systemStatus"> System Status: Excellent Coverage </div>
+								
+								<!-- Signal Analysis Section -->
+								<div class="output-section">
+									<h4>📡 Signal Analysis</h4>
+									<div class="metric">
+										<span class="metric-label">Avg Rx Power (Covered):</span>
+										<span class="metric-value" id="avgReceivedPower">0.00 dBm</span>
+									</div>
+									<div class="metric">
+										<span class="metric-label">Min Rx Power (Covered):</span>
+										<span class="metric-value" id="minReceivedPower">0.00 dBm</span>
+									</div>
+									<div class="metric">
+										<span class="metric-label">Max Rx Power (Covered):</span>
+										<span class="metric-value" id="maxReceivedPower">0.00 dBm</span>
+									</div>
+									<div class="metric">
+										<span class="metric-label">Signal Dynamic Range:</span>
+										<span class="metric-value" id="signalRange">0.00 dB</span>
+									</div>
+								</div>
+								
+								<!-- Path Loss Analysis Section -->
+								<div class="output-section">
+									<h4>🌐 Path Loss Analysis</h4>
+									<div class="metric">
+										<span class="metric-label">Avg Total Path Loss:</span>
+										<span class="metric-value" id="avgPathloss">0.00 dB</span>
+									</div>
+									<div class="metric">
+										<span class="metric-label">Avg Obstacle Shadow (dB):</span>
+										<span class="metric-value" id="avgShadowLoss">0.00 dB</span>
+									</div>
+									<div class="metric">
+										<span class="metric-label">Max Coverage Distance:</span>
+										<span class="metric-value" id="maxDistance">0.00 km</span>
+									</div>
+								</div>
+								
+								<!-- Environment Impact Section -->
+								<div class="output-section">
+									<h4>🏢 Environment Impact</h4>
+									<div class="metric">
+										<span class="metric-label">Environment Factor:</span>
+										<span class="metric-value" id="envFactor">Urban</span>
+									</div>
+									<div class="metric">
+										<span class="metric-label">Obstacle Count:</span>
+										<span class="metric-value" id="obstacleCount">0</span>
+									</div>
+									<div class="metric">
+										<span class="metric-label">Shadowing Model:</span>
+										<span class="metric-value" id="shadowingFactor">Obstacle-based</span>
+									</div>
+								</div>
+								
+								<!-- Status Indicator -->
+								<div class="status-indicator" id="systemStatus">
+									System Status: Excellent Coverage
+								</div>
 							</div>
 						</div>
 		
