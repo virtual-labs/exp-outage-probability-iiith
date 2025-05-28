@@ -50,6 +50,8 @@ gridContainer.style.height = `${rows * gridSize}px`;
 const tooltip = document.createElement("div");
 tooltip.className = "tooltip";
 tooltip.style.display = "none";
+tooltip.style.position = "fixed"; // Changed from absolute to fixed
+tooltip.style.zIndex = "10000"; // Ensure high z-index
 document.body.appendChild(tooltip);
 
 function createGrid() {
@@ -78,9 +80,18 @@ function createGrid() {
         lateralScaleForTinge: 0 // Initialize
       };
 
-      cellElement.addEventListener('click', () => handleCellClick(row, col));
-      cellElement.addEventListener('mouseover', (e) => showTooltip(e, row, col));
-      cellElement.addEventListener('mouseout', () => hideTooltip());
+      // Use separate functions to avoid scope issues
+      cellElement.addEventListener('click', function() {
+        handleCellClick(row, col);
+      });
+      
+      cellElement.addEventListener('mouseover', function(e) {
+        showTooltip(e, row, col);
+      });
+      
+      cellElement.addEventListener('mouseout', function() {
+        hideTooltip();
+      });
     }
   }
 }
@@ -409,6 +420,7 @@ function handleCellClick(row, col) {
 function showTooltip(event, row, col) {
     const cell = cells[row][col];
     if (!cell) return;
+    
     let content = `Cell (${col}, ${row})<br>`;
     if (row === transmitter.y && col === transmitter.x) {
         content += `Type: Transmitter<br>Power: ${document.getElementById('Pt').value} dBm`;
@@ -418,36 +430,53 @@ function showTooltip(event, row, col) {
         content += `Rx Power: ${cell.receivedPower.toFixed(2)} dBm<br>`;
         content += `Total PL: ${cell.currentPathloss.toFixed(2)} dB<br>`;
         if (cell.lossComponents) {
-            content += `  Base Model PL: ${cell.lossComponents.base.toFixed(2)} dB<br>`;
-            content += `  Obstacle Shadow: ${cell.lossComponents.obstacleShadow.toFixed(2)} dB<br>`;
+            content += `  Base Model PL: ${cell.lossComponents.base.toFixed(2)} dB<br>`;
+            content += `  Obstacle Shadow: ${cell.lossComponents.obstacleShadow.toFixed(2)} dB<br>`;
         }
         content += `Distance: ${(cell.distance / 1000).toFixed(2)} km<br>`;
         
-        // --- MODIFICATION FOR STATUS COLOR ---
         if (cell.isOutage) {
-            content += `Status: <span style="color: #ff6b6b; font-weight: bold;">Outage</span>`; // Lighter Red
+            content += `Status: <span style="color: #ff6b6b; font-weight: bold;">Outage</span>`;
         } else {
-            content += `Status: <span style="color: #69f0ae; font-weight: bold;">Covered</span>`; // Lighter Green
+            content += `Status: <span style="color: #69f0ae; font-weight: bold;">Covered</span>`;
         }
-        // --- END OF MODIFICATION ---
 
         if(cell.isVisuallyShadowed && cell.lateralScaleForTinge > 0.001) {
             const alpha = cell.element.style.getPropertyValue('--shadow-alpha');
             content += `<br><i>(In shadow, Tinge Alpha: ${alpha ? parseFloat(alpha).toFixed(3) : 'N/A'})</i>`;
         }
     }
+    
     tooltip.innerHTML = content;
     tooltip.style.display = "block";
-    const offset = 15; 
-    let newX = event.clientX + offset, newY = event.clientY + offset;
-    const tooltipRect = tooltip.getBoundingClientRect(), bodyRect = document.body.getBoundingClientRect();
-    if (newX + tooltipRect.width > bodyRect.right) newX = event.clientX - tooltipRect.width - offset;
-    if (newY + tooltipRect.height > bodyRect.bottom) newY = event.clientY - tooltipRect.height - offset;
-    tooltip.style.left = `${Math.max(0, newX)}px`;
-    tooltip.style.top = `${Math.max(0, newY)}px`;
-    }
+    
+    // Better positioning logic
+    const offset = 15;
+    tooltip.style.left = `${event.pageX + offset}px`;
+    tooltip.style.top = `${event.pageY + offset}px`;
+    
+    // Handle edge cases for tooltip positioning
+    setTimeout(() => {
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Check if tooltip goes beyond right edge
+        if (event.clientX + offset + tooltipRect.width > viewportWidth) {
+            tooltip.style.left = `${event.pageX - tooltipRect.width - offset}px`;
+        }
+        
+        // Check if tooltip goes beyond bottom edge
+        if (event.clientY + offset + tooltipRect.height > viewportHeight) {
+            tooltip.style.top = `${event.pageY - tooltipRect.height - offset}px`;
+        }
+    }, 0);
+}
 
-function hideTooltip() { tooltip.style.display = "none"; }
+function hideTooltip() {
+    tooltip.style.display = "none";
+}
+
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
@@ -492,5 +521,8 @@ function initialize() {
   setupInputListeners();
   setMode('normal'); 
   updatePathlossAndMetrics(); 
+  
+  // Add this to verify tooltip is initialized
+  console.log("Tooltip initialized:", tooltip);
 }
 document.addEventListener('DOMContentLoaded', initialize);

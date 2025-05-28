@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Shadowing and Outage Probability Lab</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: grid;
+      grid-template-columns: 320px 1fr 350px;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      overflow: hidden; 
+    }
+
+    #inputs, #simulation, #outputs {
+      border: none;
+      margin: 10px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+      overflow: auto; 
+    }
+
+    #inputs, #outputs {
+      padding: 20px;
+    }
+
+    #simulation {
+      display: flex; 
+      justify-content: center;
+      align-items: center;
+      position: relative; 
+      padding: 15px; 
+    }
+
+    h3 {
+      color: #333;
+      margin: 0 0 20px 0;
+      text-align: center;
+      font-size: 1.3em;
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .input-group:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #444;
+      font-size: 0.9em;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    input:focus, select:focus {
+      border-color: #667eea;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .grid-container {
+      border: 3px solid #333;
+      border-radius: 12px;
+      overflow: hidden; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      background: #333; 
+    }
+
+    .cell {
+      width: 18px; 
+      height: 18px; 
+      border: none; 
+      cursor: pointer;
+      transition: background-color 0.1s ease, transform 0.2s ease; 
+      position: relative; /* Needed for ::after pseudo-element */
+    }
+
+    .cell:hover {
+      transform: scale(1.15); 
+      z-index: 10;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6); 
+    }
+
+    .transmitter {
+      border-radius: 50%;
+      border: 3px solid #000 !important;
+      background: radial-gradient(circle, #ffeb3b, #ff9800) !important;
+      box-shadow: 0 0 12px rgba(255, 193, 7, 0.8);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 12px rgba(255, 193, 7, 0.8); transform: scale(1); }
+      50% { box-shadow: 0 0 20px rgba(255, 193, 7, 1); transform: scale(1.05); }
+    }
+
+    .obstacle-normal {
+      background: linear-gradient(45deg, #555, #777) !important; 
+      border: 1px solid #222 !important; 
+    }
+
+    .obstacle-heavy {
+      background: linear-gradient(45deg, #7A0000, #C01030) !important; 
+      border: 1px solid #500 !important; 
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .outage-cell {
+      box-shadow: inset 0 0 0 1px #dd0033, 0 0 4px rgba(255, 23, 68, 0.5);
+      animation: blink-outage 1.5s infinite alternate; 
+    }
+    
+    .obstacle-normal.outage-cell, 
+    .obstacle-heavy.outage-cell {
+         box-shadow: inset 0 0 0 1px #dd0033, 0 0 4px rgba(255, 23, 68, 0.5);
+    }
+
+    @keyframes blink-outage { 
+      from { box-shadow: inset 0 0 0 1px #dd0033, 0 0 4px rgba(255, 23, 68, 0.5); }
+      to   { box-shadow: inset 0 0 0 1px #ff4466, 0 0 7px rgba(255, 87, 34, 0.7); }
+    }
+
+    /* Style for shadowed cells */
+    .cell.shadowed-cell::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        /* Use a CSS variable for dynamic alpha. Default to a very light base. */
+        background-color: rgba(0, 0, 0, var(--shadow-alpha, 0.02)); /* Default alpha if var not set, very light */
+        pointer-events: none; 
+        z-index: 1; 
+        transition: background-color 0.1s ease-in-out; /* Smooth alpha changes if needed */
+    }
+    .transmitter.shadowed-cell::after { display: none; } 
+    .obstacle-normal.shadowed-cell::after,
+    .obstacle-heavy.shadowed-cell::after {
+        display: none; 
+    }
+
+
+    .tooltip {
+      position: absolute;
+      background: linear-gradient(135deg, #2c3e50, #34495e); 
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 12px;
+      pointer-events: none;
+      white-space: nowrap;
+      transform: translate(-50%, -120%); 
+      z-index: 1000;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .output-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.85); 
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+    }
+
+    .output-section h4 { margin: 0 0 12px 0; color: #2c3e50; font-size: 1.1em; font-weight: 600; }
+    .metric { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.08); }
+    .metric:last-child { border-bottom: none; }
+    .metric-label { font-weight: 500; color: #34495e; font-size: 0.9em; }
+    .metric-value { font-family: 'Courier New', monospace; font-weight: bold; color: #2c3e50; font-size: 0.95em; }
+
+    .status-indicator { padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; margin-top: 10px; transition: all 0.3s ease; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+    .status-excellent { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
+    .status-good { background: linear-gradient(135deg, #f1c40f, #f39c12); color: white; }
+    .status-fair { background: linear-gradient(135deg, #e67e22, #d35400); color: white; }
+    .status-poor { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+
+    .legend { margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.85); border-radius: 10px; border: 1px solid rgba(102, 126, 234, 0.15); }
+    .legend h4 { margin: 0 0 12px 0; color: #2c3e50; font-size: 1em; font-weight: 600; }
+    .legend-item { display: flex; align-items: center; margin: 8px 0; font-size: 0.85em; color: #34495e;}
+    .legend-color { width: 20px; height: 20px; border-radius: 4px; margin-right: 10px; border: 1px solid #bdc3c7; flex-shrink: 0; }
+
+    .instructions { font-size: 0.85em; color: #34495e; margin-top: 15px; padding: 12px; background: linear-gradient(135deg, #ecf0f1, #e0e6e8); border-radius: 8px; border-left: 4px solid #f39c12; line-height: 1.4; }
+    button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; margin-top: 15px; transition: all 0.3s ease; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+    button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); filter: brightness(1.1); }
+    .mode-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .mode-btn { padding: 8px 4px; margin: 0; font-size: 0.8em; border-radius: 6px; }
+    .mode-btn.active { background: linear-gradient(135deg, #2ecc71, #27ae60); transform: scale(0.97); box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
+    .progress-bar { width: 100%; height: 8px; background: rgba(0,0,0,0.08); border-radius: 4px; overflow: hidden; margin: 5px 0; }
+    .progress-fill { height: 100%; transition: width 0.3s ease; }
+    #outageProgress.progress-fill { background: linear-gradient(90deg, #e74c3c, #c0392b); } 
+  </style>
+</head>
+<body>
+  <div id="inputs">
+    <h3>🎛️ System Parameters</h3>
+    <div class="input-group"> <label for="setting">📡 Environment Type:</label> <select id="setting"> <option value="urban">Urban (High Interference)</option> <option value="suburban">Suburban (Medium)</option> <option value="rural">Rural (Low Interference)</option> </select> </div>
+    <div class="input-group"> <label for="Pt">🔋 Transmitter Power (dBm):</label> <input type="number" id="Pt" value="30" min="0" max="50" step="1"> </div>
+    <div class="input-group"> <label for="Pmin">📶 Min Required Power (dBm):</label> <input type="number" id="Pmin" value="-85" min="-120" max="-50" step="1"> </div>
+    <div class="input-group"> <label for="frequency">📻 Frequency (MHz):</label> <input type="number" id="frequency" value="900" min="400" max="6000" step="50"> </div>
+    <!-- Path Loss Exponent and Shadow Fading Std Dev Inputs REMOVED -->
+    <div class="input-group"> <label>🖱️ Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
+    <button onclick="clearAll()">🗑️ Clear All Obstacles</button> <button onclick="randomObstacles()">🎲 Random Obstacles</button>
+    <div class="instructions"> <strong>📋 Instructions:</strong><br> • Yellow circle = Transmitter<br> • Click cells to place obstacles<br> • Red outlined cells = Outage<br> • Tinged cells = Shadowed by obstacle<br> • Hover for detailed cell info<br> • Adjust parameters to see effects </div>
+    <div class="legend"> <h4>🎨 Legend</h4> <div class="legend-item"> <div class="legend-color" style="background: radial-gradient(circle, #ffeb3b, #ff9800); border-radius: 50%;"></div> <span>Transmitter</span> </div>     <!-- ... other legend items ... -->
+    <div class="legend-item"> 
+        <div class="legend-color" style="background: linear-gradient(45deg, #555, #777);"></div> 
+        <!-- MODIFIED Legend Text -->
+        <span>Normal Obstacle (18dB Max Shadow)</span> 
+    </div> 
+    <div class="legend-item"> 
+        <div class="legend-color" style="background: linear-gradient(45deg, #7A0000, #C01030);"></div> 
+        <!-- MODIFIED Legend Text -->
+        <span>Heavy Obstacle (35dB Max Shadow)</span> 
+    </div>
+    <!-- ... other legend items ... --> <div class="legend-item"> <div class="legend-color" style="background: #00ff00;"></div> <span>Strong Signal (>-60dBm)</span> </div> <div class="legend-item"> <div class="legend-color" style="background: #ffff00;"></div> <span>Medium Signal (-60 to -80dBm)</span> </div> <div class="legend-item"> <div class="legend-color" style="background: #ff0000;"></div> <span>Weak Signal (<-80dBm)</span> </div> <div class="legend-item"> <div class="legend-color" style="box-shadow: inset 0 0 0 1px #dd0033;"></div> <span>Outage Indication</span> </div> <div class="legend-item"> <div class="legend-color" style="background-color: rgba(0,0,0,0.15); border: 1px dashed #555;"></div> <span>Shadowed Cell (Tinge)</span> </div> </div>
+  </div>
+
+  <div id="simulation"> <div class="grid-container" id="grid-container"></div> </div>
+
+  <div id="outputs">
+    <h3>📊 Results & Analysis</h3>
+    <div class="output-section"> <h4>🎯 Coverage Metrics</h4> <div class="metric"> <span class="metric-label">Outage Probability:</span> <span class="metric-value" id="outageProb">0.00%</span> </div> <div class="progress-bar"> <div class="progress-fill" id="outageProgress" style="width: 0%;"></div> </div> <div class="metric"> <span class="metric-label">Coverage Area:</span> <span class="metric-value" id="coverageArea">100.00%</span> </div> <div class="metric"> <span class="metric-label">Cells in Outage:</span> <span class="metric-value" id="outageCells">0 / 929</span> </div> </div>
+    <div class="output-section"> <h4>📡 Signal Analysis</h4> <div class="metric"> <span class="metric-label">Avg Rx Power (Covered):</span> <span class="metric-value" id="avgReceivedPower">0.00 dBm</span> </div> <div class="metric"> <span class="metric-label">Min Rx Power (Covered):</span> <span class="metric-value" id="minReceivedPower">0.00 dBm</span> </div> <div class="metric"> <span class="metric-label">Max Rx Power (Covered):</span> <span class="metric-value" id="maxReceivedPower">0.00 dBm</span> </div> <div class="metric"> <span class="metric-label">Signal Dynamic Range:</span> <span class="metric-value" id="signalRange">0.00 dB</span> </div> </div>
+    <div class="output-section"> <h4>🌐 Path Loss Analysis</h4> <div class="metric"> <span class="metric-label">Avg Total Path Loss:</span> <span class="metric-value" id="avgPathloss">0.00 dB</span> </div>
+      <!-- Avg Shadow Loss (Obstacle + Random) changed to Avg Obstacle Shadow (dB) -->
+      <div class="metric"> <span class="metric-label">Avg Obstacle Shadow (dB):</span> <span class="metric-value" id="avgShadowLoss">0.00 dB</span> </div> 
+      <div class="metric"> <span class="metric-label">Max Coverage Distance:</span> <span class="metric-value" id="maxDistance">0.00 km</span> </div> </div>
+    <div class="output-section"> <h4>🏢 Environment Impact</h4> <div class="metric"> <span class="metric-label">Environment Factor:</span> <span class="metric-value" id="envFactor">Urban</span> </div> <div class="metric"> <span class="metric-label">Obstacle Count:</span> <span class="metric-value" id="obstacleCount">0</span> </div>
+      <!-- Shadowing Factor (from Std) changed to Shadowing Model -->
+      <div class="metric"> <span class="metric-label">Shadowing Model:</span> <span class="metric-value" id="shadowingFactor">Obstacle-based</span> </div> 
+    </div>
+    <div class="status-indicator" id="systemStatus"> System Status: Excellent Coverage </div>
+  </div>
+
+    <script>
+    // Configuration
+    const gridSize = 18; 
+    const rows = 31;
+    const cols = 31;
+    const transmitter = { x: Math.floor(cols / 2), y: Math.floor(rows / 2) }; 
+    const CELL_SIZE_METERS = 100; 
+    
+    let currentMode = 'normal'; 
+    let cells = [];
+
+    // Shadow Fading Effect Constants
+    const MAX_SHADOW_FADE_DISTANCE_GRID_UNITS = 12; 
+    const MAX_VISUAL_ALPHA = 0.03; // Max alpha for the tinge (center of cone, close to obs)
+    const MIN_VISUAL_ALPHA = 0.002; // Min alpha for tinge (far edge of cone, far from obs)
+
+
+    const environmentFactors = {
+      urban: { pathLossOffset: 5, name: "Urban" },     
+      suburban: { pathLossOffset: 2, name: "Suburban" }, 
+      rural: { pathLossOffset: 0, name: "Rural" }      
+    };
+
+    const gridContainer = document.getElementById("grid-container");
+    gridContainer.style.display = 'grid';
+    gridContainer.style.gridTemplateRows = `repeat(${rows}, ${gridSize}px)`;
+    gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${gridSize}px)`;
+    gridContainer.style.width = `${cols * gridSize}px`; 
+    gridContainer.style.height = `${rows * gridSize}px`; 
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "tooltip";
+    tooltip.style.display = "none";
+    document.body.appendChild(tooltip);
+
+    function createGrid() {
+      gridContainer.innerHTML = ''; 
+      cells = [];
+      
+      for (let row = 0; row < rows; row++) {
+        cells[row] = [];
+        for (let col = 0; col < cols; col++) {
+          const cellElement = document.createElement("div");
+          cellElement.classList.add("cell");
+          cellElement.dataset.row = row;
+          cellElement.dataset.col = col;
+
+          if (row === transmitter.y && col === transmitter.x) {
+            cellElement.classList.add("transmitter");
+          }
+
+          gridContainer.appendChild(cellElement); 
+          cells[row][col] = {
+            element: cellElement, basePathloss: 0, currentPathloss: 0, receivedPower: 0,
+            lossComponents: { base: 0, obstacleShadow: 0 }, 
+            obstacleType: null, isOutage: false, distance: 0,
+            isVisuallyShadowed: false, 
+            distanceForTinge: MAX_SHADOW_FADE_DISTANCE_GRID_UNITS + 1,
+            lateralScaleForTinge: 0 // Initialize
+          };
+
+          cellElement.addEventListener('click', () => handleCellClick(row, col));
+          cellElement.addEventListener('mouseover', (e) => showTooltip(e, row, col));
+          cellElement.addEventListener('mouseout', () => hideTooltip());
+        }
+      }
+    }
+
+    function calculateFreeSpacePathLoss(distanceM, frequencyMHz) {
+      if (distanceM <= 0) return 0; 
+      return 20 * Math.log10(distanceM) + 20 * Math.log10(frequencyMHz) - 27.55;
+    }
+    
+    function calculatePathLoss(distanceM, frequencyMHz, environment) {
+      if (distanceM <= 0) return 0;
+      const freeSpacePL = calculateFreeSpacePathLoss(Math.max(1, distanceM), frequencyMHz); 
+      const envData = environmentFactors[environment];
+      return freeSpacePL + envData.pathLossOffset; 
+    }
+
+    // --- MODIFIED isPointShadowed for a smoother-edged triangular/cone-like shadow ---
+    // --- AND INCREASED BASE ATTENUATION FOR BOTH OBSTACLE TYPES ---
+    function isPointShadowed(targetCol, targetRow, obstacleCol, obstacleRow, obstacleType) {
+        const tx = transmitter.x;
+        const ty = transmitter.y;
+
+        const vec_tx_obs_x = obstacleCol - tx;
+        const vec_tx_obs_y = obstacleRow - ty;
+        const vec_tx_target_x = targetCol - tx;
+        const vec_tx_target_y = targetRow - ty;
+
+        const dist_tx_obs_sq = vec_tx_obs_x * vec_tx_obs_x + vec_tx_obs_y * vec_tx_obs_y;
+        const dist_tx_target_sq = vec_tx_target_x * vec_tx_target_x + vec_tx_target_y * vec_tx_target_y;
+
+        if (dist_tx_target_sq <= dist_tx_obs_sq) {
+            return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 };
+        }
+
+        const dotProduct = vec_tx_obs_x * vec_tx_target_x + vec_tx_obs_y * vec_tx_target_y;
+        if (dotProduct <= 0 || dotProduct < dist_tx_obs_sq) {
+            return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 };
+        }
+
+        const dist_tx_obs = Math.sqrt(dist_tx_obs_sq);
+        if (dist_tx_obs < 0.1) {
+            return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 };
+        }
+        
+        const perpendicularDistance = Math.abs(vec_tx_obs_x * vec_tx_target_y - vec_tx_obs_y * vec_tx_target_x) / dist_tx_obs;
+        const distanceInShadow = Math.sqrt(dist_tx_target_sq) - dist_tx_obs;
+
+        const INITIAL_SHADOW_WIDTH = 0.6; 
+        const SHADOW_SPREAD_FACTOR = 0.35; // This controls the angle/spread of the cone
+        const CORE_PERCENTAGE_OF_CONE = 0.3; 
+        const PENUMBRA_TOTAL_PERCENTAGE_OF_CONE = 1.0; 
+        const currentMaxConeHalfWidth = INITIAL_SHADOW_WIDTH + (distanceInShadow * SHADOW_SPREAD_FACTOR);
+
+        let lateralScale = 0; 
+
+        if (perpendicularDistance <= currentMaxConeHalfWidth * CORE_PERCENTAGE_OF_CONE) {
+            lateralScale = 1.0;
+        } else if (perpendicularDistance <= currentMaxConeHalfWidth * PENUMBRA_TOTAL_PERCENTAGE_OF_CONE) {
+            const coreEdge = currentMaxConeHalfWidth * CORE_PERCENTAGE_OF_CONE;
+            const penumbraEdge = currentMaxConeHalfWidth * PENUMBRA_TOTAL_PERCENTAGE_OF_CONE;
+            if (penumbraEdge > coreEdge) {
+                lateralScale = 1.0 - (perpendicularDistance - coreEdge) / (penumbraEdge - coreEdge);
+                lateralScale = Math.max(0, Math.min(1, lateralScale)); 
+            } else { 
+                lateralScale = (coreEdge === 0 && penumbraEdge === 0 && perpendicularDistance === 0) ? 1.0 : 0;
+            }
+        } else {
+            return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 };
+        }
+
+        let baseAttenuationDb = 0;
+        if (obstacleType === "heavy") {
+            // --- INCREASED for heavy obstacles ---
+            baseAttenuationDb = 35; // Was 25 dB
+            // --- END OF CHANGE ---
+        } else if (obstacleType === "normal") {
+            // --- INCREASED for normal obstacles ---
+            baseAttenuationDb = 18; // Was 12 dB
+            // --- END OF CHANGE ---
+        }
+        
+        const scaledBaseAttenuation = baseAttenuationDb * lateralScale;
+
+        return { 
+            isShadowed: lateralScale > 0.001, 
+            baseAttenuation: scaledBaseAttenuation, 
+            distanceInShadow: distanceInShadow,
+            lateralScale: lateralScale 
+        };
+    }
+
+    function getEffectiveShadowProperties(targetRow, targetCol, allObstacles) {
+        let strongestEffectiveAttenuation = 0;
+        let isVisuallyShadowedByAny = false;
+        let distanceForTingeVisual = MAX_SHADOW_FADE_DISTANCE_GRID_UNITS + 1;
+        let strongestLateralScaleForTinge = 0; 
+
+        for (const obs of allObstacles) {
+            const shadowDetails = isPointShadowed(targetCol, targetRow, obs.x, obs.y, obs.type);
+
+            if (shadowDetails.isShadowed) { 
+                isVisuallyShadowedByAny = true; 
+
+                const distanceFadeFactor = Math.max(0, 1 - (shadowDetails.distanceInShadow / MAX_SHADOW_FADE_DISTANCE_GRID_UNITS));
+                const currentEffectiveAttenuation = shadowDetails.baseAttenuation * distanceFadeFactor;
+
+                if (currentEffectiveAttenuation > strongestEffectiveAttenuation) {
+                    strongestEffectiveAttenuation = currentEffectiveAttenuation;
+                    distanceForTingeVisual = shadowDetails.distanceInShadow;
+                    strongestLateralScaleForTinge = shadowDetails.lateralScale;
+                } else if (currentEffectiveAttenuation === strongestEffectiveAttenuation) {
+                    if (shadowDetails.lateralScale > strongestLateralScaleForTinge) {
+                        distanceForTingeVisual = shadowDetails.distanceInShadow;
+                        strongestLateralScaleForTinge = shadowDetails.lateralScale;
+                    } else if (shadowDetails.lateralScale === strongestLateralScaleForTinge && shadowDetails.distanceInShadow < distanceForTingeVisual) {
+                        distanceForTingeVisual = shadowDetails.distanceInShadow;
+                    }
+                }
+            }
+        }
+        return {
+            attenuation: strongestEffectiveAttenuation,
+            isVisuallyShadowed: isVisuallyShadowedByAny,
+            distanceForTinge: distanceForTingeVisual,
+            lateralScaleForTinge: strongestLateralScaleForTinge 
+        };
+    }
+
+    function powerToColor(Pr) {
+        const weakPowerThreshold = -80;    
+        const strongPowerThreshold = -60;  
+        const mediumPowerPoint = (weakPowerThreshold + strongPowerThreshold) / 2; 
+
+        const R_RED = 255, G_RED = 0, B_RED = 0;         
+        const R_YELLOW = 255, G_YELLOW = 255, B_YELLOW = 0; 
+        const R_GREEN = 0, G_GREEN = 255, B_GREEN = 0;    
+
+        let r, g, b;
+
+        if (Pr <= weakPowerThreshold) { 
+            [r, g, b] = [R_RED, G_RED, B_RED];
+        } else if (Pr < mediumPowerPoint) { 
+            const t = (Pr - weakPowerThreshold) / (mediumPowerPoint - weakPowerThreshold);
+            r = Math.round(R_RED * (1 - t) + R_YELLOW * t);
+            g = Math.round(G_RED * (1 - t) + G_YELLOW * t);
+            b = Math.round(B_RED * (1 - t) + B_YELLOW * t);
+        } else if (Pr < strongPowerThreshold) { 
+            const t = (Pr - mediumPowerPoint) / (strongPowerThreshold - mediumPowerPoint);
+            r = Math.round(R_YELLOW * (1 - t) + R_GREEN * t);
+            g = Math.round(G_YELLOW * (1 - t) + G_GREEN * t);
+            b = Math.round(B_YELLOW * (1 - t) + B_GREEN * t);
+        } else { 
+            [r, g, b] = [R_GREEN, G_GREEN, B_GREEN];
+        }
+        return `rgb(${Math.max(0, Math.min(255, r))},${Math.max(0, Math.min(255, g))},${Math.max(0, Math.min(255, b))})`;
+    }
+
+
+    function updateCellPathloss(row, col, obstaclesData) {
+      const cell = cells[row][col];
+      const Pt = parseFloat(document.getElementById('Pt').value); 
+
+      cell.isVisuallyShadowed = false; 
+      cell.distanceForTinge = MAX_SHADOW_FADE_DISTANCE_GRID_UNITS + 1; 
+      cell.lateralScaleForTinge = 0;
+
+      if (row === transmitter.y && col === transmitter.x) {
+        cell.receivedPower = Pt; cell.currentPathloss = 0; cell.isOutage = false; cell.distance = 0;
+        cell.lossComponents = { base: 0, obstacleShadow: 0 };
+        updateCellAppearance(cell); return cell;
+      }
+      
+      if (cell.obstacleType) {
+        cell.receivedPower = -200; cell.currentPathloss = Pt - cell.receivedPower; cell.isOutage = true; 
+        cell.distance = Math.sqrt((col - transmitter.x)**2 + (row - transmitter.y)**2) * CELL_SIZE_METERS;
+        cell.lossComponents = { base: cell.currentPathloss, obstacleShadow: 0 };
+        updateCellAppearance(cell); return cell;
+      }
+
+      const distanceGrid = Math.sqrt((col - transmitter.x)**2 + (row - transmitter.y)**2);
+      const distanceM = distanceGrid * CELL_SIZE_METERS;
+      cell.distance = distanceM;
+
+      const Pmin = parseFloat(document.getElementById('Pmin').value);
+      const frequencyVal = parseFloat(document.getElementById('frequency').value);
+      const environmentVal = document.getElementById('setting').value;
+
+      cell.basePathloss = calculatePathLoss(distanceM, frequencyVal, environmentVal);
+      cell.lossComponents.base = cell.basePathloss;
+
+      const shadowProps = getEffectiveShadowProperties(row, col, obstaclesData);
+      const obstacleShadowAttenuation = shadowProps.attenuation;
+      cell.isVisuallyShadowed = shadowProps.isVisuallyShadowed;
+      cell.distanceForTinge = shadowProps.distanceForTinge; 
+      cell.lateralScaleForTinge = shadowProps.lateralScaleForTinge;
+
+      cell.lossComponents.obstacleShadow = obstacleShadowAttenuation;
+      
+      cell.currentPathloss = cell.basePathloss + obstacleShadowAttenuation;
+      cell.receivedPower = Pt - cell.currentPathloss;
+      cell.isOutage = cell.receivedPower < Pmin;
+
+      updateCellAppearance(cell);
+      return cell;
+    }
+
+    function updateCellAppearance(cell) {
+      const cellElement = cell.element;
+      cellElement.classList.remove('outage-cell', 'shadowed-cell');
+      cellElement.style.removeProperty('--shadow-alpha'); 
+
+      if (cellElement.classList.contains("transmitter")) return; 
+      
+      if (cell.obstacleType) {
+        cellElement.classList.add('outage-cell'); 
+        return;
+      }
+
+      cellElement.style.backgroundColor = powerToColor(cell.receivedPower);
+
+      if (cell.isVisuallyShadowed && cell.lateralScaleForTinge > 0.001) {
+          cellElement.classList.add('shadowed-cell');
+          
+          const distanceFadeRatio = Math.max(0, 1 - (cell.distanceForTinge / MAX_SHADOW_FADE_DISTANCE_GRID_UNITS));
+          const maxAlphaAtThisDistance = MIN_VISUAL_ALPHA + (MAX_VISUAL_ALPHA - MIN_VISUAL_ALPHA) * (1 - (1 - distanceFadeRatio) * (1 - distanceFadeRatio));
+          const currentAlpha = maxAlphaAtThisDistance * cell.lateralScaleForTinge;
+
+          cellElement.style.setProperty('--shadow-alpha', Math.max(0, currentAlpha).toFixed(3)); 
+      }
+
+      if (cell.isOutage) {
+        cellElement.classList.add("outage-cell"); 
+      }
+    }
+
+    function updatePathlossAndMetrics() {
+      const obstaclesData = [];
+      let totalPathlossSum = 0, totalReceivedPowerSum = 0, totalObstacleShadowSum = 0;
+      let simulatedCellsCount = 0, outageCellsCount = 0;
+      let minRxPowerCovered = Infinity, maxRxPowerCovered = -Infinity, maxCoverageDist = 0;
+      let obstacleCount = 0;
+
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        if (cells[r][c].obstacleType) {
+          obstaclesData.push({ x: c, y: r, type: cells[r][c].obstacleType });
+          obstacleCount++;
+        }
+      }
+
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const cellData = updateCellPathloss(r, c, obstaclesData); 
+        if ((r === transmitter.y && c === transmitter.x) || cellData.obstacleType) continue; 
+
+        simulatedCellsCount++;
+        totalPathlossSum += cellData.currentPathloss;
+        if (cellData.lossComponents) {
+            totalObstacleShadowSum += cellData.lossComponents.obstacleShadow;
+        }
+        
+        if (cellData.isOutage) outageCellsCount++;
+        else {
+          totalReceivedPowerSum += cellData.receivedPower; 
+          minRxPowerCovered = Math.min(minRxPowerCovered, cellData.receivedPower);
+          maxRxPowerCovered = Math.max(maxRxPowerCovered, cellData.receivedPower);
+          maxCoverageDist = Math.max(maxCoverageDist, cellData.distance);
+        }
+      }
+      
+      const coveredCellsCount = simulatedCellsCount - outageCellsCount; 
+      const outageProb = simulatedCellsCount > 0 ? (outageCellsCount / simulatedCellsCount) * 100 : 0;
+      const coverageArea = simulatedCellsCount > 0 ? (coveredCellsCount / simulatedCellsCount) * 100 : 0;
+      const avgPathloss = simulatedCellsCount > 0 ? totalPathlossSum / simulatedCellsCount : 0;
+      const avgReceivedPower = coveredCellsCount > 0 ? totalReceivedPowerSum / coveredCellsCount : (simulatedCellsCount > 0 ? NaN : 0);
+      const avgObstacleShadow = simulatedCellsCount > 0 ? totalObstacleShadowSum / simulatedCellsCount : 0;
+      const signalRange = (maxRxPowerCovered !== -Infinity && minRxPowerCovered !== Infinity && maxRxPowerCovered > minRxPowerCovered) ? (maxRxPowerCovered - minRxPowerCovered) : 0;
+
+      updateMetricDisplays({
+        outageProb, coverageArea, 
+        outageCells: outageCellsCount, 
+        totalSimulatedCells: simulatedCellsCount, 
+        avgPathloss, avgReceivedPower, 
+        avgShadowLoss: avgObstacleShadow, 
+        minRxPower: minRxPowerCovered === Infinity ? NaN : minRxPowerCovered,
+        maxRxPower: maxRxPowerCovered === -Infinity ? NaN : maxRxPowerCovered,
+        signalRange, maxCoverageDist: maxCoverageDist / 1000, obstacleCount
+      });
+    }
+
+    function updateMetricDisplays(metrics) {
+      document.getElementById('outageProb').textContent = `${metrics.outageProb.toFixed(2)}%`;
+      document.getElementById('outageProgress').style.width = `${metrics.outageProb.toFixed(2)}%`;
+      document.getElementById('coverageArea').textContent = `${metrics.coverageArea.toFixed(2)}%`;
+      document.getElementById('outageCells').textContent = `${metrics.outageCells} / ${metrics.totalSimulatedCells}`; 
+      document.getElementById('avgReceivedPower').textContent = `${isNaN(metrics.avgReceivedPower) ? 'N/A' : metrics.avgReceivedPower.toFixed(2)} dBm`;
+      document.getElementById('minReceivedPower').textContent = `${isNaN(metrics.minRxPower) ? 'N/A' : metrics.minRxPower.toFixed(2)} dBm`;
+      document.getElementById('maxReceivedPower').textContent = `${isNaN(metrics.maxRxPower) ? 'N/A' : metrics.maxRxPower.toFixed(2)} dBm`;
+      document.getElementById('signalRange').textContent = `${metrics.signalRange.toFixed(2)} dB`;
+      document.getElementById('avgPathloss').textContent = `${metrics.avgPathloss.toFixed(2)} dB`;
+      document.getElementById('avgShadowLoss').textContent = `${metrics.avgShadowLoss.toFixed(2)} dB`; 
+      document.getElementById('maxDistance').textContent = `${metrics.maxCoverageDist.toFixed(2)} km`;
+      const environment = document.getElementById('setting').value;
+      document.getElementById('envFactor').textContent = environmentFactors[environment].name;
+      document.getElementById('obstacleCount').textContent = metrics.obstacleCount;
+      document.getElementById('shadowingFactor').textContent = "Cone (Fading w/ Penumbra)"; 
+      const statusIndicator = document.getElementById('systemStatus');
+      statusIndicator.classList.remove('status-excellent', 'status-good', 'status-fair', 'status-poor');
+      if (metrics.outageProb <= 5) { statusIndicator.textContent = "System Status: Excellent Coverage"; statusIndicator.classList.add('status-excellent');}
+      else if (metrics.outageProb <= 15) { statusIndicator.textContent = "System Status: Good Coverage"; statusIndicator.classList.add('status-good');}
+      else if (metrics.outageProb <= 30) { statusIndicator.textContent = "System Status: Fair Coverage"; statusIndicator.classList.add('status-fair');}
+      else { statusIndicator.textContent = "System Status: Poor Coverage"; statusIndicator.classList.add('status-poor');}
+    }
+
+    function handleCellClick(row, col) {
+      if (row === transmitter.y && col === transmitter.x) return; 
+      const cell = cells[row][col];
+      const cellElement = cell.element;
+      cellElement.classList.remove('obstacle-normal', 'obstacle-heavy', 'outage-cell', 'shadowed-cell');
+      cellElement.style.removeProperty('--shadow-alpha'); 
+      cellElement.style.backgroundColor = ''; 
+      if (currentMode === 'erase' || cell.obstacleType === currentMode) cell.obstacleType = null;
+      else if (currentMode === 'normal') { cell.obstacleType = 'normal'; cellElement.classList.add('obstacle-normal'); }
+      else if (currentMode === 'heavy') { cell.obstacleType = 'heavy'; cellElement.classList.add('obstacle-heavy'); }
+      updatePathlossAndMetrics();
+    }
+
+    function showTooltip(event, row, col) {
+        const cell = cells[row][col];
+        if (!cell) return;
+        let content = `Cell (${col}, ${row})<br>`;
+        if (row === transmitter.y && col === transmitter.x) {
+            content += `Type: Transmitter<br>Power: ${document.getElementById('Pt').value} dBm`;
+        } else if (cell.obstacleType) {
+            content += `Type: ${cell.obstacleType.charAt(0).toUpperCase() + cell.obstacleType.slice(1)} Obstacle`;
+        } else {
+            content += `Rx Power: ${cell.receivedPower.toFixed(2)} dBm<br>`;
+            content += `Total PL: ${cell.currentPathloss.toFixed(2)} dB<br>`;
+            if (cell.lossComponents) {
+                content += `  Base Model PL: ${cell.lossComponents.base.toFixed(2)} dB<br>`;
+                content += `  Obstacle Shadow: ${cell.lossComponents.obstacleShadow.toFixed(2)} dB<br>`;
+            }
+            content += `Distance: ${(cell.distance / 1000).toFixed(2)} km<br>`;
+            
+            // --- MODIFICATION FOR STATUS COLOR ---
+            if (cell.isOutage) {
+                content += `Status: <span style="color: #ff6b6b; font-weight: bold;">Outage</span>`; // Lighter Red
+            } else {
+                content += `Status: <span style="color: #69f0ae; font-weight: bold;">Covered</span>`; // Lighter Green
+            }
+            // --- END OF MODIFICATION ---
+
+            if(cell.isVisuallyShadowed && cell.lateralScaleForTinge > 0.001) {
+                const alpha = cell.element.style.getPropertyValue('--shadow-alpha');
+                content += `<br><i>(In shadow, Tinge Alpha: ${alpha ? parseFloat(alpha).toFixed(3) : 'N/A'})</i>`;
+            }
+        }
+        tooltip.innerHTML = content;
+        tooltip.style.display = "block";
+        const offset = 15; 
+        let newX = event.clientX + offset, newY = event.clientY + offset;
+        const tooltipRect = tooltip.getBoundingClientRect(), bodyRect = document.body.getBoundingClientRect();
+        if (newX + tooltipRect.width > bodyRect.right) newX = event.clientX - tooltipRect.width - offset;
+        if (newY + tooltipRect.height > bodyRect.bottom) newY = event.clientY - tooltipRect.height - offset;
+        tooltip.style.left = `${Math.max(0, newX)}px`;
+        tooltip.style.top = `${Math.max(0, newY)}px`;
+        }
+
+    function hideTooltip() { tooltip.style.display = "none"; }
+    function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.mode-btn[onclick="setMode('${mode}')"]`).classList.add('active');
+    }
+
+    function clearAll() {
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        if (cells[r][c].obstacleType) {
+          cells[r][c].obstacleType = null;
+          cells[r][c].element.classList.remove('obstacle-normal', 'obstacle-heavy');
+        }
+      }
+      updatePathlossAndMetrics();
+    }
+
+    function randomObstacles() {
+      clearAll(); 
+      const numObstacles = Math.floor(Math.random() * (rows*cols*0.05)) + Math.floor(rows*cols*0.02); 
+      for (let i = 0; i < numObstacles; i++) {
+        let r, c;
+        do { r = Math.floor(Math.random()*rows); c = Math.floor(Math.random()*cols); }
+        while ((r === transmitter.y && c === transmitter.x) || cells[r][c].obstacleType);
+        const type = Math.random() < 0.7 ? 'normal' : 'heavy'; 
+        cells[r][c].obstacleType = type;
+        cells[r][c].element.classList.add(type === 'normal' ? 'obstacle-normal' : 'obstacle-heavy');
+      }
+      updatePathlossAndMetrics();
+    }
+
+    function setupInputListeners() {
+      const inputsToWatch = ['Pt', 'Pmin', 'frequency', 'setting']; 
+      inputsToWatch.forEach(id => {
+        const element = document.getElementById(id);
+        element.addEventListener('change', updatePathlossAndMetrics);
+        if (element.type === 'number') element.addEventListener('input', updatePathlossAndMetrics);
+      });
+    }
+
+    function initialize() {
+      createGrid(); 
+      setupInputListeners();
+      setMode('normal'); 
+      updatePathlossAndMetrics(); 
+    }
+    document.addEventListener('DOMContentLoaded', initialize);
+  </script>
+</body>
+</html>
