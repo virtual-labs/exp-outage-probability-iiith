@@ -18,7 +18,7 @@
 				<h2 class="title">Outage calculation</h2>
 				<div class="columns is-centered">
 					<div class="v-collapsible-instruction-container v-instruction-container" style="margin-top: 2%;">
-						<div class="v-collapsible is-size-5">📋 Instructions</div>
+						<div class="v-collapsible is-size-5"> Instructions</div>
 						<div class="v-content" style="text-align: left; padding: 0 10%;">
 							<h3 class="mb-3"><b>🔍 Exploring Outage Probability & Coverage</b></h3>
 							
@@ -68,16 +68,18 @@
 				</div>
 				<div class="columns-container">
 					<div class="left-column box">
+				
 							  <div id="inputs">
 									<h3 style="margin-bottom: 15px;">System Parameters</h3>
-									<div class="input-group"> <label for="setting"> Environment Type:</label> <select id="setting"> <option value="urban">Urban (High Interference)</option> <option value="suburban">Suburban (Medium)</option> <option value="rural">Rural (Low Interference)</option> </select> </div>
+							
+									<div class="input-group"> <label for="setting">Environment Type:</label> <select id="setting"> <option value="urban">Urban (High Interference)</option> <option value="suburban">Suburban (Medium)</option> <option value="rural">Rural (Low Interference)</option> </select> </div>
 									<div class="input-group"> <label for="Pt">Transmitter Power (dBm):</label> <input type="number" id="Pt" value="30" min="0" max="50" step="1"> </div>
 									<div class="input-group"> <label for="Pmin">Min Required Power (dBm):</label> <input type="number" id="Pmin" value="-85" min="-120" max="-50" step="1"> </div>
 									<div class="input-group"> <label for="frequency">Frequency (MHz):</label> <input type="number" id="frequency" value="900" min="400" max="6000" step="50"> </div>
 									<!-- Path Loss Exponent and Shadow Fading Std Dev Inputs REMOVED -->
-									<div class="input-group"> <label>Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
-									<button onclick="clearAll()" class="action-btn" style="border-radius: 8px;margin-bottom: 15px;" >Clear All Obstacles</button> 
-							
+									<div class="input-group"> <label> Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
+									<button onclick="clearAll()" class="action-btn" style="border-radius: 8px;">Clear All Obstacles</button> 
+									<hr>
 									<button onclick="randomObstacles()" class="action-btn" style="border-radius: 8px;">Random Obstacles</button>
 							
 						</div>
@@ -85,7 +87,7 @@
 					<div class="center-column box">
 					
 							<div id="simulation"> <div class="grid-container" id="grid-container"></div> </div>
-            	<div class="legend"> <h4>Legend</h4> <div class="legend-item"> <div class="legend-color" style="background: radial-gradient(circle, #ffeb3b, #ff9800); border-radius: 50%;"></div> <span>Transmitter</span> </div>     <!-- ... other legend items ... -->
+            	<div class="legend"> <h4> Legend</h4> <div class="legend-item"> <div class="legend-color" style="background: radial-gradient(circle, #ffeb3b, #ff9800); border-radius: 50%;"></div> <span>Transmitter</span> </div>     <!-- ... other legend items ... -->
 									<div class="legend-item"> 
 											<div class="legend-color" style="background: linear-gradient(45deg, #555, #777);"></div> 
 											<!-- MODIFIED Legend Text -->
@@ -107,7 +109,7 @@
 								
 								<!-- Coverage Metrics Section -->
 								<div class="output-section">
-									<h4> Coverage Metrics</h4>
+									<h4>Coverage Metrics</h4>
 									<div class="metric">
 										<span class="metric-label">Outage Probability:</span>
 										<span class="metric-value" id="outageProb">0.00%</span>
@@ -127,7 +129,7 @@
 								
 								<!-- Signal Analysis Section -->
 								<div class="output-section">
-									<h4> Signal Analysis</h4>
+									<h4>Signal Analysis</h4>
 									<div class="metric">
 										<span class="metric-label">Avg Rx Power (Covered):</span>
 										<span class="metric-value" id="avgReceivedPower">0.00 dBm</span>
@@ -148,7 +150,7 @@
 								
 								<!-- Path Loss Analysis Section -->
 								<div class="output-section">
-									<h4> Path Loss Analysis</h4>
+									<h4>Path Loss Analysis</h4>
 									<div class="metric">
 										<span class="metric-label">Avg Total Path Loss:</span>
 										<span class="metric-value" id="avgPathloss">0.00 dB</span>
@@ -165,7 +167,7 @@
 								
 								<!-- Environment Impact Section -->
 								<div class="output-section">
-									<h4> Environment Impact</h4>
+									<h4>Environment Impact</h4>
 									<div class="metric">
 										<span class="metric-label">Environment Factor:</span>
 										<span class="metric-value" id="envFactor">Urban</span>
