@@ -348,6 +348,9 @@ th{
   display: flex;
   justify-content: space-between;
   margin-top: 20px; /* Adjust as needed */
+  flex-wrap: wrap;
+  gap: 15px;
+  width: 100%;
 }
 
 .left-column {
@@ -358,6 +361,9 @@ th{
   border-radius: 10px;
   padding: 20px;
   max-height: 930px; /* Limit height for scrolling */
+  min-width: 250px;
+  height: auto;
+  overflow: auto;
 }
 
 .center-column {
@@ -367,6 +373,9 @@ th{
   border-radius: 10px;
   padding: 20px;
   max-height: 800px;
+  min-width: 300px;
+  height: auto;
+  overflow: auto;
 }
 
 .right-column {
@@ -376,8 +385,9 @@ th{
   border: 2px solid #98CB3B; /* Light green border */
   border-radius: 10px;
   padding: 20px;
-  min-width: 400px;
-  max-height: 850px;
+  min-width: 250px;
+  height: auto;
+  overflow: auto;
 }
 
 
