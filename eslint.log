@@ -1,0 +1,8 @@
+
+/home/runner/work/exp-outage-probability-iiith/exp-outage-probability-iiith/experiment/simulation/js/main.js
+  394:25  warning  Irregular whitespace not allowed             no-irregular-whitespace
+  395:25  warning  Irregular whitespace not allowed             no-irregular-whitespace
+  450:10  warning  'randomObstacles' is defined but never used  no-unused-vars
+
+✖ 3 problems (0 errors, 3 warnings)
+
