@@ -1,24 +1,3 @@
-//Your JavaScript goes in here
-function openPart(evt, name){
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tabcontent");
-    for (i = 0; i < tabcontent.length; i++) {
-      tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(name).style.display = "block";
-    evt.currentTarget.className += " active";
-}
-
-function startup() {
-    document.getElementById("default").click();
-}
-
-window.onload = startup;
-
 const gridSize = 18; 
 const rows = 31;
 const cols = 31;
@@ -30,8 +9,8 @@ let cells = [];
 
 // Shadow Fading Effect Constants
 const MAX_SHADOW_FADE_DISTANCE_GRID_UNITS = 12; 
-const MAX_VISUAL_ALPHA = 0.03; // Max alpha for the tinge (center of cone, close to obs)
-const MIN_VISUAL_ALPHA = 0.002; // Min alpha for tinge (far edge of cone, far from obs)
+const MAX_VISUAL_ALPHA = 0.03; 
+const MIN_VISUAL_ALPHA = 0.002; 
 
 
 const environmentFactors = {
@@ -50,8 +29,6 @@ gridContainer.style.height = `${rows * gridSize}px`;
 const tooltip = document.createElement("div");
 tooltip.className = "tooltip";
 tooltip.style.display = "none";
-tooltip.style.position = "fixed"; // Changed from absolute to fixed
-tooltip.style.zIndex = "10000"; // Ensure high z-index
 document.body.appendChild(tooltip);
 
 function createGrid() {
@@ -77,21 +54,12 @@ function createGrid() {
         obstacleType: null, isOutage: false, distance: 0,
         isVisuallyShadowed: false, 
         distanceForTinge: MAX_SHADOW_FADE_DISTANCE_GRID_UNITS + 1,
-        lateralScaleForTinge: 0 // Initialize
+        lateralScaleForTinge: 0 
       };
 
-      // Use separate functions to avoid scope issues
-      cellElement.addEventListener('click', function() {
-        handleCellClick(row, col);
-      });
-      
-      cellElement.addEventListener('mouseover', function(e) {
-        showTooltip(e, row, col);
-      });
-      
-      cellElement.addEventListener('mouseout', function() {
-        hideTooltip();
-      });
+      cellElement.addEventListener('click', () => handleCellClick(row, col));
+      cellElement.addEventListener('mouseover', (e) => showTooltip(e, row, col));
+      cellElement.addEventListener('mouseout', () => hideTooltip());
     }
   }
 }
@@ -108,8 +76,6 @@ function calculatePathLoss(distanceM, frequencyMHz, environment) {
   return freeSpacePL + envData.pathLossOffset; 
 }
 
-// --- MODIFIED isPointShadowed for a smoother-edged triangular/cone-like shadow ---
-// --- AND INCREASED BASE ATTENUATION FOR BOTH OBSTACLE TYPES ---
 function isPointShadowed(targetCol, targetRow, obstacleCol, obstacleRow, obstacleType) {
     const tx = transmitter.x;
     const ty = transmitter.y;
@@ -140,7 +106,7 @@ function isPointShadowed(targetCol, targetRow, obstacleCol, obstacleRow, obstacl
     const distanceInShadow = Math.sqrt(dist_tx_target_sq) - dist_tx_obs;
 
     const INITIAL_SHADOW_WIDTH = 0.6; 
-    const SHADOW_SPREAD_FACTOR = 0.35; // This controls the angle/spread of the cone
+    const SHADOW_SPREAD_FACTOR = 0.35; 
     const CORE_PERCENTAGE_OF_CONE = 0.3; 
     const PENUMBRA_TOTAL_PERCENTAGE_OF_CONE = 1.0; 
     const currentMaxConeHalfWidth = INITIAL_SHADOW_WIDTH + (distanceInShadow * SHADOW_SPREAD_FACTOR);
@@ -164,13 +130,9 @@ function isPointShadowed(targetCol, targetRow, obstacleCol, obstacleRow, obstacl
 
     let baseAttenuationDb = 0;
     if (obstacleType === "heavy") {
-        // --- INCREASED for heavy obstacles ---
-        baseAttenuationDb = 35; // Was 25 dB
-        // --- END OF CHANGE ---
+        baseAttenuationDb = 35; 
     } else if (obstacleType === "normal") {
-        // --- INCREASED for normal obstacles ---
-        baseAttenuationDb = 18; // Was 12 dB
-        // --- END OF CHANGE ---
+        baseAttenuationDb = 18;
     }
     
     const scaledBaseAttenuation = baseAttenuationDb * lateralScale;
@@ -420,7 +382,6 @@ function handleCellClick(row, col) {
 function showTooltip(event, row, col) {
     const cell = cells[row][col];
     if (!cell) return;
-    
     let content = `Cell (${col}, ${row})<br>`;
     if (row === transmitter.y && col === transmitter.x) {
         content += `Type: Transmitter<br>Power: ${document.getElementById('Pt').value} dBm`;
@@ -430,8 +391,8 @@ function showTooltip(event, row, col) {
         content += `Rx Power: ${cell.receivedPower.toFixed(2)} dBm<br>`;
         content += `Total PL: ${cell.currentPathloss.toFixed(2)} dB<br>`;
         if (cell.lossComponents) {
-            content += `  Base Model PL: ${cell.lossComponents.base.toFixed(2)} dB<br>`;
-            content += `  Obstacle Shadow: ${cell.lossComponents.obstacleShadow.toFixed(2)} dB<br>`;
+            content += `  Base Model PL: ${cell.lossComponents.base.toFixed(2)} dB<br>`;
+            content += `  Obstacle Shadow: ${cell.lossComponents.obstacleShadow.toFixed(2)} dB<br>`;
         }
         content += `Distance: ${(cell.distance / 1000).toFixed(2)} km<br>`;
         
@@ -440,43 +401,24 @@ function showTooltip(event, row, col) {
         } else {
             content += `Status: <span style="color: #69f0ae; font-weight: bold;">Covered</span>`;
         }
-
+        
         if(cell.isVisuallyShadowed && cell.lateralScaleForTinge > 0.001) {
             const alpha = cell.element.style.getPropertyValue('--shadow-alpha');
             content += `<br><i>(In shadow, Tinge Alpha: ${alpha ? parseFloat(alpha).toFixed(3) : 'N/A'})</i>`;
         }
     }
-    
     tooltip.innerHTML = content;
     tooltip.style.display = "block";
-    
-    // Better positioning logic
-    const offset = 15;
-    tooltip.style.left = `${event.pageX + offset}px`;
-    tooltip.style.top = `${event.pageY + offset}px`;
-    
-    // Handle edge cases for tooltip positioning
-    setTimeout(() => {
-        const tooltipRect = tooltip.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        
-        // Check if tooltip goes beyond right edge
-        if (event.clientX + offset + tooltipRect.width > viewportWidth) {
-            tooltip.style.left = `${event.pageX - tooltipRect.width - offset}px`;
-        }
-        
-        // Check if tooltip goes beyond bottom edge
-        if (event.clientY + offset + tooltipRect.height > viewportHeight) {
-            tooltip.style.top = `${event.pageY - tooltipRect.height - offset}px`;
-        }
-    }, 0);
-}
+    const offset = 15; 
+    let newX = event.clientX + offset, newY = event.clientY + offset;
+    const tooltipRect = tooltip.getBoundingClientRect(), bodyRect = document.body.getBoundingClientRect();
+    if (newX + tooltipRect.width > bodyRect.right) newX = event.clientX - tooltipRect.width - offset;
+    if (newY + tooltipRect.height > bodyRect.bottom) newY = event.clientY - tooltipRect.height - offset;
+    tooltip.style.left = `${Math.max(0, newX)}px`;
+    tooltip.style.top = `${Math.max(0, newY)}px`;
+    }
 
-function hideTooltip() {
-    tooltip.style.display = "none";
-}
-
+function hideTooltip() { tooltip.style.display = "none"; }
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
@@ -493,13 +435,35 @@ function clearAll() {
   updatePathlossAndMetrics();
 }
 
+function generatePoisson(mean) {
+    if (mean <= 0) return 0;
+    const L = Math.exp(-mean);
+    let p = 1.0;
+    let k = 0;
+    do {
+        k++;
+        p *= Math.random();
+    } while (p > L);
+    return k - 1;
+}
+
 function randomObstacles() {
   clearAll(); 
-  const numObstacles = Math.floor(Math.random() * (rows*cols*0.05)) + Math.floor(rows*cols*0.02); 
+
+  const densityPer100 = parseFloat(document.getElementById('obstacleDensity').value);
+  const gridArea = rows * cols;
+  const meanObstacles = (densityPer100 / 100) * gridArea;
+
+  const numObstaclesToPlace = generatePoisson(meanObstacles);
+  
+  const maxPlaceable = gridArea - 1; 
+  const numObstacles = Math.min(numObstaclesToPlace, maxPlaceable);
+
   for (let i = 0; i < numObstacles; i++) {
     let r, c;
     do { r = Math.floor(Math.random()*rows); c = Math.floor(Math.random()*cols); }
     while ((r === transmitter.y && c === transmitter.x) || cells[r][c].obstacleType);
+    
     const type = Math.random() < 0.7 ? 'normal' : 'heavy'; 
     cells[r][c].obstacleType = type;
     cells[r][c].element.classList.add(type === 'normal' ? 'obstacle-normal' : 'obstacle-heavy');
@@ -521,8 +485,5 @@ function initialize() {
   setupInputListeners();
   setMode('normal'); 
   updatePathlossAndMetrics(); 
-  
-  // Add this to verify tooltip is initialized
-  console.log("Tooltip initialized:", tooltip);
 }
 document.addEventListener('DOMContentLoaded', initialize);
