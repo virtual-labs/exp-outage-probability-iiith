@@ -239,8 +239,8 @@
     .legend-color { width: 20px; height: 20px; border-radius: 4px; margin-right: 10px; border: 1px solid #ced4da; flex-shrink: 0; }
 
     .instructions { font-size: 0.85em; color: #495057; margin-top: 15px; padding: 12px; background: white; border-radius: 8px; border-left: 4px solid #ffc107; line-height: 1.4; }
-    .action-button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; margin-top: 15px; transition: all 0.2s ease; }
-    .action-button:hover { background: #0069d9; }
+    .action-button { width: 100%; padding: 12px; background: #98CB3B; color: white; border: solid; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.95em; margin-top: 15px; transition: all 0.2s ease; }
+    .action-button:hover { background:  #98CB3B; }
     .mode-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
     .mode-btn { padding: 8px 4px; margin: 0; font-size: 0.8em; border-radius: 6px; background: #6c757d; border:none; color:white; cursor:pointer; }
     .mode-btn.active { background: #28a745; transform: scale(1.05); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
