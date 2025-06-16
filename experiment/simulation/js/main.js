@@ -1,7 +1,16 @@
 let inputsPanel, outputsPanel, chartStatsPanel, panelHolder;
 let simInputsContainer, simOutputsContainer, analysisInputsContainer, analysisOutputsContainer;
 
+// Create the tooltip variable but don't initialize it yet
+let tooltip;
+
 function initialize() {
+  // Create tooltip element
+  tooltip = document.createElement("div");
+  tooltip.className = "tooltip";
+  tooltip.style.display = "none";
+  document.body.appendChild(tooltip);
+  
   inputsPanel = document.getElementById('inputs-panel');
   outputsPanel = document.getElementById('outputs-panel');
   chartStatsPanel = document.getElementById('chart-stats-panel');
@@ -79,11 +88,6 @@ gridContainer.style.gridTemplateRows = `repeat(${rows}, ${gridSize}px)`;
 gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${gridSize}px)`;
 gridContainer.style.width = `${cols * gridSize}px`; 
 gridContainer.style.height = `${rows * gridSize}px`; 
-
-const tooltip = document.createElement("div");
-tooltip.className = "tooltip";
-tooltip.style.display = "none";
-document.body.appendChild(tooltip);
 
 function createGrid() {
   gridContainer.innerHTML = ''; 
@@ -435,9 +439,12 @@ function handleCellClick(row, col) {
   updatePathlossAndMetrics();
 }
 
+// Modify showTooltip function to ensure tooltip exists
 function showTooltip(event, row, col) {
     const cell = cells[row][col];
-    if (!cell) return;
+    if (!cell || !tooltip) return;
+    
+    // Rest of your existing tooltip code
     let content = `Cell (${col}, ${row})<br>`;
     if (row === transmitter.y && col === transmitter.x) {
         content += `Type: Transmitter<br>Power: ${document.getElementById('Pt').value} dBm`;
@@ -447,8 +454,8 @@ function showTooltip(event, row, col) {
         content += `Rx Power: ${cell.receivedPower.toFixed(2)} dBm<br>`;
         content += `Total PL: ${cell.currentPathloss.toFixed(2)} dB<br>`;
         if (cell.lossComponents) {
-            content += `  Base Model PL: ${cell.lossComponents.base.toFixed(2)} dB<br>`;
-            content += `  Obstacle Shadow: ${cell.lossComponents.obstacleShadow.toFixed(2)} dB<br>`;
+            content += `  Base Model PL: ${cell.lossComponents.base.toFixed(2)} dB<br>`;
+            content += `  Obstacle Shadow: ${cell.lossComponents.obstacleShadow.toFixed(2)} dB<br>`;
         }
         content += `Distance: ${(cell.distance / 1000).toFixed(2)} km<br>`;
         
@@ -465,6 +472,7 @@ function showTooltip(event, row, col) {
     }
     tooltip.innerHTML = content;
     tooltip.style.display = "block";
+    
     const offset = 15; 
     let newX = event.clientX + offset, newY = event.clientY + offset;
     const tooltipRect = tooltip.getBoundingClientRect(), bodyRect = document.body.getBoundingClientRect();
@@ -474,7 +482,11 @@ function showTooltip(event, row, col) {
     tooltip.style.top = `${Math.max(0, newY)}px`;
 }
 
-function hideTooltip() { tooltip.style.display = "none"; }
+// Modify hideTooltip to check if tooltip exists
+function hideTooltip() { 
+    if (tooltip) tooltip.style.display = "none"; 
+}
+
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));

@@ -209,7 +209,7 @@
     .tooltip {
       position: absolute; background: #212529; 
       color: white; padding: 10px 15px; border-radius: 8px; font-size: 12px; pointer-events: none;
-      white-space: nowrap; transform: translate(-50%, -120%); z-index: 1000;
+      white-space: nowrap; transform: translate(-50%, -120%); z-index: 9999; /* Ensure it's above everything else */
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
     .output-section {
