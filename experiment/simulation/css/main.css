@@ -250,3 +250,230 @@
     
     .chart-control-group { display: flex; flex-direction: column; gap: 5px; }
     .chart-control-group label { font-size: 0.85em; font-weight: 600; color: #495057; }
+
+/* Add Mobile Responsiveness */
+@media screen and (max-width: 600px) {
+    .main-tasks-container {
+        padding: 5px 10px 0;
+        gap: 2px;
+    }
+    
+    .main-task-btn {
+        padding: 10px 12px;
+        font-size: 0.9em;
+    }
+    
+    .page-content.active {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .column {
+        padding: 15px;
+        border-radius: 10px;
+    }
+    
+    .input-group {
+        padding: 12px;
+    }
+    
+    /* Make grid container responsive */
+    .grid-container {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 320px;
+        transform: scale(0.85);
+        transform-origin: top center;
+    }
+    
+    .cell {
+        width: 15px;
+        height: 15px;
+    }
+    
+    /* Adjust legend size */
+    .legend {
+        width: 100%;
+        padding: 10px;
+        gap: 8px;
+    }
+    
+    .legend-item {
+        font-size: 0.75em;
+    }
+    
+    .legend-color {
+        width: 15px;
+        height: 15px;
+        margin-right: 5px;
+    }
+    
+    /* Chart responsiveness */
+    .chart-controls {
+        padding: 12px;
+        gap: 15px;
+    }
+    
+    .chart-container {
+        height: 300px;
+        padding: 10px;
+    }
+    
+    /* Make buttons more touch-friendly */
+    .action-button {
+        padding: 15px;
+        font-size: 1em;
+    }
+    
+    .mode-buttons {
+        gap: 5px;
+    }
+    
+    .mode-btn {
+        padding: 12px 5px;
+        font-size: 0.85em;
+    }
+    
+    /* Adjust metric displays */
+    .metric {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .metric-value {
+        font-size: 0.9em;
+    }
+    
+    /* Adjust tooltips for touch */
+    .tooltip {
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+
+    /* Better grid handling for mobile */
+    .grid-container {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 300px;
+        transform: scale(0.65);
+        transform-origin: center top;
+        margin: 0 auto;
+        touch-action: manipulation; /* Improve touch handling */
+    }
+    
+    /* Fix touch interaction issues */
+    .cell {
+        width: 16px; /* Slightly larger for touch */
+        height: 16px;
+        touch-action: manipulation;
+    }
+    
+    .cell:hover {
+        transform: scale(1.1); /* Smaller hover effect on mobile */
+    }
+    
+    /* Make touch targets bigger */
+    .main-task-btn {
+        padding: 15px 10px;
+        min-height: 48px; /* Good minimum size for touch targets */
+    }
+    
+    /* Fix scroll issues */
+    body {
+        overflow-x: hidden;
+    }
+    
+    /* Better padding for small screens */
+    .page-content {
+        padding: 5px;
+    }
+    
+    .column {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    /* Improve form controls for touch */
+    input, select {
+        padding: 12px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+    
+    /* Improve buttons for touch */
+    button, .action-button {
+        min-height: 44px;
+    }
+}
+
+/* Add even smaller screen optimizations */
+@media screen and (max-width: 375px) {
+    .main-task-btn {
+        padding: 8px 8px;
+        font-size: 0.8em;
+    }
+    
+    h3 {
+        font-size: 1.1em;
+    }
+    
+    .grid-container {
+        transform: scale(0.75);
+    }
+    
+    /* Further optimize layout elements */
+    .output-section h4 {
+        font-size: 1em;
+    }
+    
+    .legend h4 {
+        font-size: 0.9em;
+    }
+
+    /* More aggressive adjustments */
+    .grid-container {
+        transform: scale(0.55);
+        margin-top: -20px; /* Negative margin to save space */
+        margin-bottom: -20px;
+    }
+    
+    /* Make text smaller on very small screens */
+    body {
+        font-size: 14px;
+    }
+    
+    /* Further simplify UI */
+    .legend-item {
+        font-size: 0.7em;
+    }
+    
+    /* Stack buttons for better touch access */
+    .mode-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Additional class for touch devices */
+.touch-device .cell {
+    transition: none; /* Remove hover transitions on touch devices */
+}
+
+.touch-device .cell:active {
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+/* Fix for touch devices to ensure elements are not too small */
+.touch-device .mode-btn,
+.touch-device .action-button {
+    padding: 15px 10px;
+    margin-bottom: 10px;
+}
+
+/* Fix for charts on mobile */
+@media screen and (max-width: 600px) {
+    .chart-container {
+        height: 250px; /* Shorter height on mobile */
+    }
+}
