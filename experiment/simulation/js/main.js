@@ -1,16 +1,8 @@
+// --- GLOBAL PANEL REFERENCES ---
 let inputsPanel, outputsPanel, chartStatsPanel, panelHolder;
 let simInputsContainer, simOutputsContainer, analysisInputsContainer, analysisOutputsContainer;
 
-// Create the tooltip variable but don't initialize it yet
-let tooltip;
-
 function initialize() {
-  // Create tooltip element
-  tooltip = document.createElement("div");
-  tooltip.className = "tooltip";
-  tooltip.style.display = "none";
-  document.body.appendChild(tooltip);
-  
   inputsPanel = document.getElementById('inputs-panel');
   outputsPanel = document.getElementById('outputs-panel');
   chartStatsPanel = document.getElementById('chart-stats-panel');
@@ -43,7 +35,7 @@ function switchMainTask(taskName) {
   if (taskName === 'simulation') {
     simInputsContainer.appendChild(inputsPanel);
     simOutputsContainer.appendChild(outputsPanel);
-  } else {
+  } else { // 'analysis'
     analysisInputsContainer.appendChild(inputsPanel);
     analysisOutputsContainer.appendChild(chartStatsPanel);
     setTimeout(() => {
@@ -62,7 +54,6 @@ updatePathlossAndMetrics = function() {
   }
 };
 
-// ... (The rest of the JS code from the previous step is identical) ...
 const gridSize = 18; 
 const rows = 31;
 const cols = 31;
@@ -76,6 +67,19 @@ const MAX_SHADOW_FADE_DISTANCE_GRID_UNITS = 12;
 const MAX_VISUAL_ALPHA = 0.03; 
 const MIN_VISUAL_ALPHA = 0.002; 
 
+// MODIFICATION: Add constant for fading standard deviation and helper function
+const FADING_STD_DEV_PER_OBSTACLE = 10; // As requested, in dB for a single obstacle
+
+// Helper for fading simulation using Box-Muller transform
+function gaussianRandom(stdDev) {
+    if (stdDev === 0) return 0;
+    let u = 0, v = 0;
+    while(u === 0) u = Math.random();
+    while(v === 0) v = Math.random();
+    let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    return num * stdDev;
+}
+
 const environmentFactors = {
   urban: { pathLossOffset: 5, name: "Urban" },     
   suburban: { pathLossOffset: 2, name: "Suburban" }, 
@@ -88,6 +92,11 @@ gridContainer.style.gridTemplateRows = `repeat(${rows}, ${gridSize}px)`;
 gridContainer.style.gridTemplateColumns = `repeat(${cols}, ${gridSize}px)`;
 gridContainer.style.width = `${cols * gridSize}px`; 
 gridContainer.style.height = `${rows * gridSize}px`; 
+
+const tooltip = document.createElement("div");
+tooltip.className = "tooltip";
+tooltip.style.display = "none";
+document.body.appendChild(tooltip);
 
 function createGrid() {
   gridContainer.innerHTML = ''; 
@@ -107,9 +116,17 @@ function createGrid() {
 
       gridContainer.appendChild(cellElement); 
       cells[row][col] = {
-        element: cellElement, basePathloss: 0, currentPathloss: 0, receivedPower: 0,
+        element: cellElement,
+        // Values for grid visualization (deterministic)
+        currentPathloss: 0, 
+        receivedPower: 0,
+        isOutage: false,
+        // Value for plot randomization
+        pathlossWithFading: 0,
+        // Shared properties
         lossComponents: { base: 0, obstacleShadow: 0 }, 
-        obstacleType: null, isOutage: false, distance: 0,
+        obstacleType: null, 
+        distance: 0,
         isVisuallyShadowed: false, 
         distanceForTinge: MAX_SHADOW_FADE_DISTANCE_GRID_UNITS + 1,
         lateralScaleForTinge: 0 
@@ -137,28 +154,18 @@ function calculatePathLoss(distanceM, frequencyMHz, environment) {
 function isPointShadowed(targetCol, targetRow, obstacleCol, obstacleRow, obstacleType) {
     const tx = transmitter.x;
     const ty = transmitter.y;
-
     const vec_tx_obs_x = obstacleCol - tx;
     const vec_tx_obs_y = obstacleRow - ty;
     const vec_tx_target_x = targetCol - tx;
     const vec_tx_target_y = targetRow - ty;
-
     const dist_tx_obs_sq = vec_tx_obs_x * vec_tx_obs_x + vec_tx_obs_y * vec_tx_obs_y;
     const dist_tx_target_sq = vec_tx_target_x * vec_tx_target_x + vec_tx_target_y * vec_tx_target_y;
 
-    if (dist_tx_target_sq <= dist_tx_obs_sq) {
-        return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 };
-    }
-
+    if (dist_tx_target_sq <= dist_tx_obs_sq) { return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 }; }
     const dotProduct = vec_tx_obs_x * vec_tx_target_x + vec_tx_obs_y * vec_tx_target_y;
-    if (dotProduct <= 0 || dotProduct < dist_tx_obs_sq) {
-        return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 };
-    }
-
+    if (dotProduct <= 0 || dotProduct < dist_tx_obs_sq) { return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 }; }
     const dist_tx_obs = Math.sqrt(dist_tx_obs_sq);
-    if (dist_tx_obs < 0.1) {
-        return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 };
-    }
+    if (dist_tx_obs < 0.1) { return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 }; }
     
     const perpendicularDistance = Math.abs(vec_tx_obs_x * vec_tx_target_y - vec_tx_obs_y * vec_tx_target_x) / dist_tx_obs;
     const distanceInShadow = Math.sqrt(dist_tx_target_sq) - dist_tx_obs;
@@ -170,7 +177,6 @@ function isPointShadowed(targetCol, targetRow, obstacleCol, obstacleRow, obstacl
     const currentMaxConeHalfWidth = INITIAL_SHADOW_WIDTH + (distanceInShadow * SHADOW_SPREAD_FACTOR);
 
     let lateralScale = 0; 
-
     if (perpendicularDistance <= currentMaxConeHalfWidth * CORE_PERCENTAGE_OF_CONE) {
         lateralScale = 1.0;
     } else if (perpendicularDistance <= currentMaxConeHalfWidth * PENUMBRA_TOTAL_PERCENTAGE_OF_CONE) {
@@ -179,40 +185,30 @@ function isPointShadowed(targetCol, targetRow, obstacleCol, obstacleRow, obstacl
         if (penumbraEdge > coreEdge) {
             lateralScale = 1.0 - (perpendicularDistance - coreEdge) / (penumbraEdge - coreEdge);
             lateralScale = Math.max(0, Math.min(1, lateralScale)); 
-        } else { 
-            lateralScale = (coreEdge === 0 && penumbraEdge === 0 && perpendicularDistance === 0) ? 1.0 : 0;
-        }
-    } else {
-        return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 };
-    }
+        } else { lateralScale = (coreEdge === 0 && penumbraEdge === 0 && perpendicularDistance === 0) ? 1.0 : 0; }
+    } else { return { isShadowed: false, baseAttenuation: 0, distanceInShadow: 0, lateralScale: 0 }; }
 
     let baseAttenuationDb = 0;
-    if (obstacleType === "heavy") {
-        baseAttenuationDb = 35; 
-    } else if (obstacleType === "normal") {
-        baseAttenuationDb = 18;
-    }
-    
+    if (obstacleType === "heavy") { baseAttenuationDb = 35; } 
+    else if (obstacleType === "normal") { baseAttenuationDb = 18; }
     const scaledBaseAttenuation = baseAttenuationDb * lateralScale;
 
-    return { 
-        isShadowed: lateralScale > 0.001, 
-        baseAttenuation: scaledBaseAttenuation, 
-        distanceInShadow: distanceInShadow,
-        lateralScale: lateralScale 
-    };
+    return { isShadowed: lateralScale > 0.001, baseAttenuation: scaledBaseAttenuation, distanceInShadow: distanceInShadow, lateralScale: lateralScale };
 }
 
+// MODIFICATION: This function now also returns the count of affecting obstacles for fading calculation.
 function getEffectiveShadowProperties(targetRow, targetCol, allObstacles) {
     let strongestEffectiveAttenuation = 0;
     let isVisuallyShadowedByAny = false;
     let distanceForTingeVisual = MAX_SHADOW_FADE_DISTANCE_GRID_UNITS + 1;
     let strongestLateralScaleForTinge = 0; 
+    let affectingObstacleCount = 0;
 
     for (const obs of allObstacles) {
         const shadowDetails = isPointShadowed(targetCol, targetRow, obs.x, obs.y, obs.type);
 
         if (shadowDetails.isShadowed) { 
+            affectingObstacleCount++;
             isVisuallyShadowedByAny = true; 
 
             const distanceFadeFactor = Math.max(0, 1 - (shadowDetails.distanceInShadow / MAX_SHADOW_FADE_DISTANCE_GRID_UNITS));
@@ -236,7 +232,8 @@ function getEffectiveShadowProperties(targetRow, targetCol, allObstacles) {
         attenuation: strongestEffectiveAttenuation,
         isVisuallyShadowed: isVisuallyShadowedByAny,
         distanceForTinge: distanceForTingeVisual,
-        lateralScaleForTinge: strongestLateralScaleForTinge 
+        lateralScaleForTinge: strongestLateralScaleForTinge,
+        affectingObstacleCount: affectingObstacleCount 
     };
 }
 
@@ -244,16 +241,13 @@ function powerToColor(Pr) {
     const weakPowerThreshold = -80;    
     const strongPowerThreshold = -60;  
     const mediumPowerPoint = (weakPowerThreshold + strongPowerThreshold) / 2; 
-
     const R_RED = 255, G_RED = 0, B_RED = 0;         
     const R_YELLOW = 255, G_YELLOW = 255, B_YELLOW = 0; 
     const R_GREEN = 0, G_GREEN = 255, B_GREEN = 0;    
 
     let r, g, b;
-
-    if (Pr <= weakPowerThreshold) { 
-        [r, g, b] = [R_RED, G_RED, B_RED];
-    } else if (Pr < mediumPowerPoint) { 
+    if (Pr <= weakPowerThreshold) { [r, g, b] = [R_RED, G_RED, B_RED]; } 
+    else if (Pr < mediumPowerPoint) { 
         const t = (Pr - weakPowerThreshold) / (mediumPowerPoint - weakPowerThreshold);
         r = Math.round(R_RED * (1 - t) + R_YELLOW * t);
         g = Math.round(G_RED * (1 - t) + G_YELLOW * t);
@@ -263,13 +257,11 @@ function powerToColor(Pr) {
         r = Math.round(R_YELLOW * (1 - t) + R_GREEN * t);
         g = Math.round(G_YELLOW * (1 - t) + G_GREEN * t);
         b = Math.round(B_YELLOW * (1 - t) + B_GREEN * t);
-    } else { 
-        [r, g, b] = [R_GREEN, G_GREEN, B_GREEN];
-    }
+    } else { [r, g, b] = [R_GREEN, G_GREEN, B_GREEN]; }
     return `rgb(${Math.max(0, Math.min(255, r))},${Math.max(0, Math.min(255, g))},${Math.max(0, Math.min(255, b))})`;
 }
 
-
+// MODIFICATION: This function now calculates BOTH deterministic and random pathloss values.
 function updateCellPathloss(row, col, obstaclesData) {
   const cell = cells[row][col];
   const Pt = parseFloat(document.getElementById('Pt').value); 
@@ -279,13 +271,13 @@ function updateCellPathloss(row, col, obstaclesData) {
   cell.lateralScaleForTinge = 0;
 
   if (row === transmitter.y && col === transmitter.x) {
-    cell.receivedPower = Pt; cell.currentPathloss = 0; cell.isOutage = false; cell.distance = 0;
+    cell.receivedPower = Pt; cell.currentPathloss = 0; cell.pathlossWithFading = 0; cell.isOutage = false; cell.distance = 0;
     cell.lossComponents = { base: 0, obstacleShadow: 0 };
     updateCellAppearance(cell); return cell;
   }
   
   if (cell.obstacleType) {
-    cell.receivedPower = -200; cell.currentPathloss = Pt - cell.receivedPower; cell.isOutage = true; 
+    cell.receivedPower = -200; cell.currentPathloss = Pt - cell.receivedPower; cell.pathlossWithFading = cell.currentPathloss; cell.isOutage = true; 
     cell.distance = Math.sqrt((col - transmitter.x)**2 + (row - transmitter.y)**2) * CELL_SIZE_METERS;
     cell.lossComponents = { base: cell.currentPathloss, obstacleShadow: 0 };
     updateCellAppearance(cell); return cell;
@@ -299,20 +291,33 @@ function updateCellPathloss(row, col, obstaclesData) {
   const frequencyVal = parseFloat(document.getElementById('frequency').value);
   const environmentVal = document.getElementById('setting').value;
 
-  cell.basePathloss = calculatePathLoss(distanceM, frequencyVal, environmentVal);
-  cell.lossComponents.base = cell.basePathloss;
+  const basePathloss = calculatePathLoss(distanceM, frequencyVal, environmentVal);
+  cell.lossComponents.base = basePathloss;
 
   const shadowProps = getEffectiveShadowProperties(row, col, obstaclesData);
   const obstacleShadowAttenuation = shadowProps.attenuation;
+  
   cell.isVisuallyShadowed = shadowProps.isVisuallyShadowed;
   cell.distanceForTinge = shadowProps.distanceForTinge; 
   cell.lateralScaleForTinge = shadowProps.lateralScaleForTinge;
-
   cell.lossComponents.obstacleShadow = obstacleShadowAttenuation;
   
-  cell.currentPathloss = cell.basePathloss + obstacleShadowAttenuation;
+  // --- SEPARATE CALCULATIONS FOR GRID vs. PLOTS ---
+  
+  // 1. For the grid visualization (DETERMINISTIC)
+  cell.currentPathloss = basePathloss + obstacleShadowAttenuation;
   cell.receivedPower = Pt - cell.currentPathloss;
   cell.isOutage = cell.receivedPower < Pmin;
+  
+  // 2. For the plots (RANDOMIZED)
+  let fadingLoss = 0;
+  if (shadowProps.affectingObstacleCount > 0) {
+      // The std dev of a sum of N i.i.d. random variables is sqrt(N) * std_dev of one.
+      const totalStdDev = Math.sqrt(shadowProps.affectingObstacleCount) * FADING_STD_DEV_PER_OBSTACLE;
+      fadingLoss = gaussianRandom(totalStdDev);
+  }
+  // This value is ONLY used by the updateChart function. It does not affect the grid visuals.
+  cell.pathlossWithFading = cell.currentPathloss + fadingLoss;
 
   updateCellAppearance(cell);
   return cell;
@@ -330,18 +335,18 @@ function updateCellAppearance(cell) {
     return;
   }
 
+  // Visuals are ALWAYS based on the deterministic received power.
   cellElement.style.backgroundColor = powerToColor(cell.receivedPower);
 
   if (cell.isVisuallyShadowed && cell.lateralScaleForTinge > 0.001) {
       cellElement.classList.add('shadowed-cell');
-      
       const distanceFadeRatio = Math.max(0, 1 - (cell.distanceForTinge / MAX_SHADOW_FADE_DISTANCE_GRID_UNITS));
       const maxAlphaAtThisDistance = MIN_VISUAL_ALPHA + (MAX_VISUAL_ALPHA - MIN_VISUAL_ALPHA) * (1 - (1 - distanceFadeRatio) * (1 - distanceFadeRatio));
       const currentAlpha = maxAlphaAtThisDistance * cell.lateralScaleForTinge;
-
       cellElement.style.setProperty('--shadow-alpha', Math.max(0, currentAlpha).toFixed(3)); 
   }
 
+  // Outage visualization is also based on the deterministic calculation.
   if (cell.isOutage) {
     cellElement.classList.add("outage-cell"); 
   }
@@ -354,7 +359,7 @@ function updatePathlossAndMetrics() {
   let minRxPowerCovered = Infinity, maxRxPowerCovered = -Infinity, maxCoverageDist = 0;
   let obstacleCount = 0;
   
-  const totalCells = rows * cols - 1; // All cells except the transmitter itself
+  const totalCells = rows * cols - 1;
 
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
     if (cells[r][c].obstacleType) {
@@ -367,14 +372,14 @@ function updatePathlossAndMetrics() {
     const cellData = updateCellPathloss(r, c, obstaclesData); 
     if ((r === transmitter.y && c === transmitter.x) || cellData.obstacleType) continue; 
 
+    // Metrics are based on the deterministic values to match the grid.
     simulatedCellsCount++;
     totalPathlossSum += cellData.currentPathloss;
-    if (cellData.lossComponents) {
-        totalObstacleShadowSum += cellData.lossComponents.obstacleShadow;
-    }
+    totalObstacleShadowSum += cellData.lossComponents.obstacleShadow;
     
-    if (cellData.isOutage) outageCellsCount++;
-    else {
+    if (cellData.isOutage) {
+        outageCellsCount++;
+    } else {
       totalReceivedPowerSum += cellData.receivedPower; 
       minRxPowerCovered = Math.min(minRxPowerCovered, cellData.receivedPower);
       maxRxPowerCovered = Math.max(maxRxPowerCovered, cellData.receivedPower);
@@ -386,16 +391,13 @@ function updatePathlossAndMetrics() {
   const outageProb = totalCells > 0 ? (outageCellsCount / totalCells) * 100 : 0;
   const coverageArea = totalCells > 0 ? (coveredCellsCount / totalCells) * 100 : 0;
   const avgPathloss = simulatedCellsCount > 0 ? totalPathlossSum / simulatedCellsCount : 0;
-  const avgReceivedPower = coveredCellsCount > 0 ? totalReceivedPowerSum / coveredCellsCount : (simulatedCellsCount > 0 ? NaN : 0);
+  const avgReceivedPower = coveredCellsCount > 0 ? totalReceivedPowerSum / coveredCellsCount : NaN;
   const avgObstacleShadow = simulatedCellsCount > 0 ? totalObstacleShadowSum / simulatedCellsCount : 0;
-  const signalRange = (maxRxPowerCovered !== -Infinity && minRxPowerCovered !== Infinity && maxRxPowerCovered > minRxPowerCovered) ? (maxRxPowerCovered - minRxPowerCovered) : 0;
+  const signalRange = (maxRxPowerCovered !== -Infinity && minRxPowerCovered !== Infinity) ? (maxRxPowerCovered - minRxPowerCovered) : 0;
 
   updateMetricDisplays({
-    outageProb, coverageArea, 
-    outageCells: outageCellsCount, 
-    totalSimulatedCells: totalCells, 
-    avgPathloss, avgReceivedPower, 
-    avgShadowLoss: avgObstacleShadow, 
+    outageProb, coverageArea, outageCells: outageCellsCount, totalSimulatedCells: totalCells, 
+    avgPathloss, avgReceivedPower, avgShadowLoss: avgObstacleShadow, 
     minRxPower: minRxPowerCovered === Infinity ? NaN : minRxPowerCovered,
     maxRxPower: maxRxPowerCovered === -Infinity ? NaN : maxRxPowerCovered,
     signalRange, maxCoverageDist: maxCoverageDist / 1000, obstacleCount
@@ -417,7 +419,7 @@ function updateMetricDisplays(metrics) {
   const environment = document.getElementById('setting').value;
   document.getElementById('envFactor').textContent = environmentFactors[environment].name;
   document.getElementById('obstacleCount').textContent = metrics.obstacleCount;
-  document.getElementById('shadowingFactor').textContent = "Cone (Fading w/ Penumbra)"; 
+  document.getElementById('shadowingFactor').textContent = "Cone (Geometric w/ Penumbra)"; 
   const statusIndicator = document.getElementById('systemStatus');
   statusIndicator.classList.remove('status-excellent', 'status-good', 'status-fair', 'status-poor');
   if (metrics.outageProb <= 5) { statusIndicator.textContent = "System Status: Excellent Coverage"; statusIndicator.classList.add('status-excellent');}
@@ -439,13 +441,10 @@ function handleCellClick(row, col) {
   updatePathlossAndMetrics();
 }
 
-// Modify showTooltip function to ensure tooltip exists
 function showTooltip(event, row, col) {
     const cell = cells[row][col];
-    if (!cell || !tooltip) return;
-    
-    // Rest of your existing tooltip code
-    let content = `Cell (${col}, ${row})<br>`;
+    if (!cell) return;
+    let content = ``;
     if (row === transmitter.y && col === transmitter.x) {
         content += `Type: Transmitter<br>Power: ${document.getElementById('Pt').value} dBm`;
     } else if (cell.obstacleType) {
@@ -454,17 +453,12 @@ function showTooltip(event, row, col) {
         content += `Rx Power: ${cell.receivedPower.toFixed(2)} dBm<br>`;
         content += `Total PL: ${cell.currentPathloss.toFixed(2)} dB<br>`;
         if (cell.lossComponents) {
-            content += `  Base Model PL: ${cell.lossComponents.base.toFixed(2)} dB<br>`;
-            content += `  Obstacle Shadow: ${cell.lossComponents.obstacleShadow.toFixed(2)} dB<br>`;
+            content += `  Base Model PL: ${cell.lossComponents.base.toFixed(2)} dB<br>`;
+            content += `  Obstacle Shadow: ${cell.lossComponents.obstacleShadow.toFixed(2)} dB<br>`;
         }
         content += `Distance: ${(cell.distance / 1000).toFixed(2)} km<br>`;
-        
-        if (cell.isOutage) {
-            content += `Status: <span style="color: #ff6b6b; font-weight: bold;">Outage</span>`;
-        } else {
-            content += `Status: <span style="color: #69f0ae; font-weight: bold;">Covered</span>`;
-        }
-        
+        if (cell.isOutage) { content += `Status: <span style="color: #ff6b6b; font-weight: bold;">Outage</span>`; } 
+        else { content += `Status: <span style="color: #69f0ae; font-weight: bold;">Covered</span>`; }
         if(cell.isVisuallyShadowed && cell.lateralScaleForTinge > 0.001) {
             const alpha = cell.element.style.getPropertyValue('--shadow-alpha');
             content += `<br><i>(In shadow, Tinge Alpha: ${alpha ? parseFloat(alpha).toFixed(3) : 'N/A'})</i>`;
@@ -472,7 +466,6 @@ function showTooltip(event, row, col) {
     }
     tooltip.innerHTML = content;
     tooltip.style.display = "block";
-    
     const offset = 15; 
     let newX = event.clientX + offset, newY = event.clientY + offset;
     const tooltipRect = tooltip.getBoundingClientRect(), bodyRect = document.body.getBoundingClientRect();
@@ -482,11 +475,7 @@ function showTooltip(event, row, col) {
     tooltip.style.top = `${Math.max(0, newY)}px`;
 }
 
-// Modify hideTooltip to check if tooltip exists
-function hideTooltip() { 
-    if (tooltip) tooltip.style.display = "none"; 
-}
-
+function hideTooltip() { tooltip.style.display = "none"; }
 function setMode(mode) {
   currentMode = mode;
   document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
@@ -508,30 +497,22 @@ function generatePoisson(mean) {
     const L = Math.exp(-mean);
     let p = 1.0;
     let k = 0;
-    do {
-        k++;
-        p *= Math.random();
-    } while (p > L);
+    do { k++; p *= Math.random(); } while (p > L);
     return k - 1;
 }
 
 function randomObstacles() {
   clearAll(); 
-
   const densityPer100 = parseFloat(document.getElementById('obstacleDensity').value);
   const gridArea = rows * cols;
   const meanObstacles = (densityPer100 / 100) * gridArea;
-
   const numObstaclesToPlace = generatePoisson(meanObstacles);
-  
   const maxPlaceable = gridArea - 1; 
   const numObstacles = Math.min(numObstaclesToPlace, maxPlaceable);
-
   for (let i = 0; i < numObstacles; i++) {
     let r, c;
     do { r = Math.floor(Math.random()*rows); c = Math.floor(Math.random()*cols); }
     while ((r === transmitter.y && c === transmitter.x) || cells[r][c].obstacleType);
-    
     const type = Math.random() < 0.7 ? 'normal' : 'heavy'; 
     cells[r][c].obstacleType = type;
     cells[r][c].element.classList.add(type === 'normal' ? 'obstacle-normal' : 'obstacle-heavy');
@@ -540,7 +521,7 @@ function randomObstacles() {
 }
 
 function setupInputListeners() {
-  const inputsToWatch = ['Pt', 'Pmin', 'frequency', 'setting', 'obstacleDensity']; 
+  const inputsToWatch = ['Pt', 'Pmin', 'frequency', 'setting', 'noiseFloor']; 
   inputsToWatch.forEach(id => {
     const element = document.getElementById(id);
     element.addEventListener('change', updatePathlossAndMetrics);
@@ -554,88 +535,117 @@ function initializeChart() {
   const ctx = document.getElementById('analysisChart');
   if (!ctx) return;
   if (analysisChart) { analysisChart.destroy(); }
-  
   analysisChart = new Chart(ctx, {
     type: 'scatter',
-    data: {
-      datasets: [{
-        label: 'Data Points', data: [],
-        backgroundColor: 'rgba(40, 167, 69, 0.7)',
-        borderColor: 'rgba(40, 167, 69, 1)',
-        borderWidth: 1, pointRadius: 5
-      }]
-    },
+    data: { datasets: [{ label: 'Data Points', data: [], backgroundColor: 'rgba(40, 167, 69, 0.7)', borderColor: 'rgba(40, 167, 69, 1)', borderWidth: 1, pointRadius: 5 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: {
-        x: { title: { display: true, text: 'Distance (km)' } },
-        y: { title: { display: true, text: 'Value' } }
-      },
-      plugins: {
-        legend: { display: true },
-        tooltip: {
-          callbacks: {
-            label: function(context) { return `(${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`; }
-          }
-        }
-      }
+      scales: { x: { title: { display: true, text: 'Distance (km)' } }, y: { title: { display: true, text: 'Value' } } },
+      plugins: { legend: { display: true }, tooltip: { callbacks: { label: function(context) { return `(${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`; } } } }
     }
   });
 }
 
+// MODIFICATION: This function now uses the randomized 'pathlossWithFading' for relevant plots.
 function updateChart() {
-  if (!analysisChart) {
-    initializeChart();
-    if (!analysisChart) return;
-  }
+  if (!analysisChart) { initializeChart(); if (!analysisChart) return; }
   
   const chartType = document.getElementById('chartType').value;
+  const noiseFloor = parseFloat(document.getElementById('noiseFloor').value);
+  const Pt = parseFloat(document.getElementById('Pt').value);
   const dataPoints = [];
-  
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
+
+  if (chartType === 'pout-snr') {
+    const allSimulatedCells = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
       const cell = cells[r][c];
       if ((r === transmitter.y && c === transmitter.x) || cell.obstacleType) continue;
-      
-      const distanceKm = cell.distance / 1000;
-      let yValue;
-      
-      switch (chartType) {
-        case 'snr-distance': const noiseFloor = -100; yValue = cell.receivedPower - noiseFloor; break;
-        case 'power-distance': yValue = cell.receivedPower; break;
-        case 'pathloss-distance': yValue = cell.currentPathloss; break;
-        default: yValue = cell.receivedPower;
-      }
-      dataPoints.push({ x: distanceKm, y: yValue });
+      allSimulatedCells.push(cell);
     }
+    const totalSimulatedCells = allSimulatedCells.length;
+    for (let snrThreshold = -10; snrThreshold <= 40; snrThreshold += 1) {
+      let outageCount = 0;
+      if (totalSimulatedCells > 0) {
+        for (const cell of allSimulatedCells) {
+          // This plot also uses the deterministic value to remain consistent with the lab's goal
+          const cellSnr = cell.receivedPower - noiseFloor;
+          if (cellSnr < snrThreshold) { outageCount++; }
+        }
+        const pOutage = outageCount / totalSimulatedCells;
+        dataPoints.push({ x: snrThreshold, y: pOutage });
+      }
+    }
+  } else {
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cell = cells[r][c];
+        if ((r === transmitter.y && c === transmitter.x) || cell.obstacleType) continue;
+        
+        const distanceKm = cell.distance / 1000;
+        let yValue;
+        
+        // --- PLOT-SPECIFIC DATA SELECTION ---
+        switch (chartType) {
+          case 'snr-distance':
+            // Use randomized pathloss to calculate a randomized received power for the plot
+            const receivedPowerWithFading_snr = Pt - cell.pathlossWithFading;
+            yValue = receivedPowerWithFading_snr - noiseFloor;
+            break;
+          case 'power-distance':
+            // Use randomized pathloss to calculate a randomized received power for the plot
+            const receivedPowerWithFading_pow = Pt - cell.pathlossWithFading;
+            yValue = receivedPowerWithFading_pow;
+            break;
+          case 'pathloss-distance':
+            // Use the stored randomized pathloss directly
+            yValue = cell.pathlossWithFading;
+            break;
+          case 'outage-distance':
+            // Outage plot uses the deterministic value from the grid
+            yValue = cell.isOutage ? 1 : 0;
+            break;
+          default:
+            yValue = cell.receivedPower; // Default to deterministic power
+        }
+        dataPoints.push({ x: distanceKm, y: yValue });
+      }
+    }
+    dataPoints.sort((a, b) => a.x - b.x);
   }
   
   analysisChart.data.datasets[0].data = dataPoints;
   
   const chartLabels = {
-    'snr-distance': { title: 'SNR vs Distance', yLabel: 'SNR (dB)', color: 'rgba(40, 167, 69, 0.7)' },
-    'power-distance': { title: 'Received Power vs Distance', yLabel: 'Received Power (dBm)', color: 'rgba(0, 123, 255, 0.7)' },
-    'pathloss-distance': { title: 'Path Loss vs Distance', yLabel: 'Path Loss (dB)', color: 'rgba(220, 53, 69, 0.7)' }
+    'snr-distance':      { title: 'SNR vs Distance (with Fading)', yLabel: 'SNR (dB)', xLabel: 'Distance (km)', color: 'rgba(40, 167, 69, 0.7)' },
+    'power-distance':    { title: 'Received Power vs Distance (with Fading)', yLabel: 'Received Power (dBm)', xLabel: 'Distance (km)', color: 'rgba(0, 123, 255, 0.7)' },
+    'pathloss-distance': { title: 'Path Loss vs Distance (with Fading)', yLabel: 'Path Loss (dB)', xLabel: 'Distance (km)', color: 'rgba(220, 53, 69, 0.7)' },
+    'outage-distance':   { title: 'Outage vs Distance (Deterministic)', yLabel: 'Outage (1=Yes, 0=No)', xLabel: 'Distance (km)', color: 'rgba(111, 66, 193, 0.7)' },
+    'pout-snr':          { title: 'Outage Probability vs SNR', yLabel: 'Outage Probability', xLabel: 'SNR Threshold (dB)', color: 'rgba(253, 126, 20, 0.7)'}
   };
   
   const currentLabel = chartLabels[chartType];
   analysisChart.data.datasets[0].label = currentLabel.title;
   analysisChart.data.datasets[0].backgroundColor = currentLabel.color;
   analysisChart.data.datasets[0].borderColor = currentLabel.color.replace('0.7', '1');
+  analysisChart.options.scales.x.title.text = currentLabel.xLabel;
   analysisChart.options.scales.y.title.text = currentLabel.yLabel;
-  
-  // MODIFICATION: Call the new dynamic statistic functions
-  const correlation = calculateCorrelation(dataPoints);
-  const trend = getTrend(dataPoints);
-  
   document.getElementById('chartDataPoints').textContent = dataPoints.length;
-  document.getElementById('chartCorrelation').textContent = isNaN(correlation) ? 'N/A' : correlation.toFixed(3);
-  document.getElementById('chartTrend').textContent = trend;
   
+  if (chartType === 'pout-snr') {
+    analysisChart.config.type = 'line'; analysisChart.data.datasets[0].pointRadius = 2; analysisChart.data.datasets[0].showLine = true; analysisChart.data.datasets[0].fill = true;
+    document.getElementById('chartCorrelation').textContent = 'N/A'; document.getElementById('chartTrend').textContent = 'Increasing';
+    analysisChart.options.plugins.tooltip.callbacks.label = function(context) { return `P(outage) @ ${context.parsed.x} dB: ${context.parsed.y.toFixed(3)}`; };
+  } else {
+    analysisChart.config.type = 'scatter'; analysisChart.data.datasets[0].pointRadius = 5; analysisChart.data.datasets[0].showLine = false; analysisChart.data.datasets[0].fill = false;
+    const correlation = calculateCorrelation(dataPoints);
+    const trend = dataPoints.length > 1 ? (dataPoints[dataPoints.length - 1].y > dataPoints[0].y ? 'Increasing' : 'Decreasing') : 'N/A';
+    document.getElementById('chartCorrelation').textContent = isNaN(correlation) ? 'N/A' : correlation.toFixed(3);
+    document.getElementById('chartTrend').textContent = trend;
+    analysisChart.options.plugins.tooltip.callbacks.label = function(context) { return `(${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`; };
+  }
   analysisChart.update('none');
 }
 
-// This function calculates R-squared for correlation
 function calculateCorrelation(points) {
   if (points.length < 2) return NaN;
   const n = points.length;
@@ -646,31 +656,7 @@ function calculateCorrelation(points) {
   const sumY2 = points.reduce((sum, p) => sum + (p.y * p.y), 0);
   const numerator = (n * sumXY) - (sumX * sumY);
   const denominator = Math.sqrt(((n * sumX2) - (sumX * sumX)) * ((n * sumY2) - (sumY * sumY)));
-  if (denominator === 0) return 0;
-  return (numerator / denominator) ** 2;
-}
-
-// MODIFICATION: New function to determine the trend based on Pearson's 'r'
-function getTrend(points) {
-    if (points.length < 2) return "N/A";
-
-    const n = points.length;
-    const sumX = points.reduce((sum, p) => sum + p.x, 0);
-    const sumY = points.reduce((sum, p) => sum + p.y, 0);
-    const sumXY = points.reduce((sum, p) => sum + (p.x * p.y), 0);
-    const sumX2 = points.reduce((sum, p) => sum + (p.x * p.x), 0);
-    const sumY2 = points.reduce((sum, p) => sum + (p.y * p.y), 0);
-
-    const numerator = (n * sumXY) - (sumX * sumY);
-    const denominator = Math.sqrt(((n * sumX2) - (sumX * sumX)) * ((n * sumY2) - (sumY * sumY)));
-
-    if (denominator === 0) return "N/A";
-
-    const r = numerator / denominator; // This is the Pearson correlation coefficient
-
-    if (r > 0.1) return "Increasing";
-    if (r < -0.1) return "Decreasing";
-    return "No Clear Trend";
+  return denominator === 0 ? 0 : (numerator / denominator) ** 2;
 }
 
 function loadChartJS() {

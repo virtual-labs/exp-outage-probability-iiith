@@ -11,106 +11,110 @@
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
   <div class="main-tasks-container">
-      <button id="simulation-task-btn" class="main-task-btn active" onclick="switchMainTask('simulation')">Outage Probability Analysis</button>
-      <button id="analysis-task-btn" class="main-task-btn" onclick="switchMainTask('analysis')">Plots</button>
-  </div>
+    <button id="simulation-task-btn" class="main-task-btn active" onclick="switchMainTask('simulation')">Outage Probability Analysis</button>
+    <button id="analysis-task-btn" class="main-task-btn" onclick="switchMainTask('analysis')">Plots</button>
+</div>
 
-  <div class="page-container">
-    <div id="simulation-page" class="page-content active">
-        <div id="simulation-inputs-column" class="column"></div>
-        <div id="simulation-column" class="column">
-            <div class="grid-container" id="grid-container"></div> 
-            <div class="legend"> 
-                <h4>Legend</h4>
-                <div class="legend-item"> <div class="legend-color transmitter"></div> <span>Transmitter</span> </div>
-                <div class="legend-item"> <div class="legend-color" style="background: linear-gradient(45deg, #555, #777);"></div> <span>Normal Obstacle</span> </div> 
-                <div class="legend-item"> <div class="legend-color" style="background: linear-gradient(45deg, #7A0000, #C01030);"></div> <span>Heavy Obstacle</span> </div>
-                <div class="legend-item"> <div class="legend-color" style="background: #00ff00;"></div> <span>Strong Signal</span> </div> 
-                <div class="legend-item"> <div class="legend-color" style="background: #ffff00;"></div> <span>Medium Signal</span> </div> 
-                <div class="legend-item"> <div class="legend-color" style="background: #ff0000;"></div> <span>Weak Signal</span> </div> 
-                <div class="legend-item"> <div class="legend-color" style="box-shadow: inset 0 0 0 1px #dd0033;"></div> <span>Outage</span> </div> 
-                <div class="legend-item"> <div class="legend-color" style="background-color: rgba(0,0,0,0.15); border: 1px dashed #555;"></div> <span>Shadow Tinge</span> </div> 
-            </div>
-        </div>
-        <div id="simulation-outputs-column" class="column"></div>
-    </div>
-    
-    <div id="analysis-page" class="page-content">
-        <div id="analysis-inputs-column" class="column"></div>
-        <div id="analysis-plot-column" class="column">
-            <h3>Signal Analysis Plots</h3>
-            <div class="chart-controls">
-                <div class="chart-control-group">
-                <label for="chartType">Chart Type:</label>
-                <select id="chartType" onchange="updateChart()">
-                    <option value="snr-distance">SNR vs Distance</option>
-                    <option value="power-distance">Received Power vs Distance</option>
-                    <option value="pathloss-distance">Path Loss vs Distance</option>
-                </select>
-                </div>
-            </div>
-            <div class="chart-container"> <canvas id="analysisChart"></canvas> </div>
-        </div>
-        <div id="analysis-outputs-column" class="column"></div>
-    </div>
+<div class="page-container">
+  <div id="simulation-page" class="page-content active">
+      <!-- The three columns for the simulation page -->
+      <div id="simulation-inputs-column" class="column"></div>
+      <div id="simulation-column" class="column">
+          <div class="grid-container" id="grid-container"></div> 
+          <div class="legend"> 
+              <h4>Legend</h4>
+              <div class="legend-item"> <div class="legend-color transmitter"></div> <span>Transmitter</span> </div>
+              <div class="legend-item"> <div class="legend-color" style="background: linear-gradient(45deg, #555, #777);"></div> <span>Normal Obstacle</span> </div> 
+              <div class="legend-item"> <div class="legend-color" style="background: linear-gradient(45deg, #7A0000, #C01030);"></div> <span>Heavy Obstacle</span> </div>
+              <div class="legend-item"> <div class="legend-color" style="background: #00ff00;"></div> <span>Strong Signal</span> </div> 
+              <div class="legend-item"> <div class="legend-color" style="background: #ffff00;"></div> <span>Medium Signal</span> </div> 
+              <div class="legend-item"> <div class="legend-color" style="background: #ff0000;"></div> <span>Weak Signal</span> </div> 
+              <div class="legend-item"> <div class="legend-color" style="box-shadow: inset 0 0 0 1px #dd0033;"></div> <span>Outage</span> </div> 
+              <div class="legend-item"> <div class="legend-color" style="background-color: rgba(0,0,0,0.15); border: 1px dashed #555;"></div> <span>Shadow Tinge</span> </div> 
+          </div>
+      </div>
+      <div id="simulation-outputs-column" class="column"></div>
   </div>
-
-  <div id="panel-holder" style="display: none;">
-    <div id="inputs-panel">
-      <h3>System Parameters</h3>
-      <div class="input-group"> <label for="setting">Environment Type:</label> <select id="setting"> <option value="urban">Urban (High Interference)</option> <option value="suburban">Suburban (Medium)</option> <option value="rural">Rural (Low Interference)</option> </select> </div>
-      <div class="input-group"> <label for="Pt">Transmitter Power (dBm):</label> <input type="number" id="Pt" value="30" min="0" max="50" step="1"> </div>
-      <div class="input-group"> <label for="Pmin">Min Required Power (dBm):</label> <input type="number" id="Pmin" value="-85" min="-120" max="-50" step="1"> </div>
-      <div class="input-group"> <label for="frequency">Frequency (MHz):</label> <input type="number" id="frequency" value="900" min="400" max="6000" step="50"> </div>
-      <div class="input-group"> <label for="obstacleDensity">Obstacle Density (per 100 cells):</label> <input type="number" id="obstacleDensity" value="5" min="0" max="20" step="0.1"> </div>
-      <div class="input-group"> <label>Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
-      <button class="action-button" onclick="clearAll()">Clear All Obstacles</button> 
-      <button class="action-button" onclick="randomObstacles()">Generate Layout from Density</button>
-    </div>
   
-    <div id="outputs-panel">
-      <h3>Results & Analysis</h3>
-      <div class="output-section">
-        <h4>Coverage Metrics</h4>
-        <div class="metric"> <span class="metric-label">Outage Probability:</span> <span class="metric-value" id="outageProb">0.00%</span> </div>
-        <div class="progress-bar"> <div class="progress-fill" id="outageProgress" style="width: 0%;"></div> </div>
-        <div class="metric"> <span class="metric-label">Coverage Area:</span> <span class="metric-value" id="coverageArea">100.00%</span> </div>
-        <div class="metric"> <span class="metric-label">Cells in Outage:</span> <span class="metric-value" id="outageCells">0 / 960</span> </div>
+  <div id="analysis-page" class="page-content">
+      <!-- The three columns for the analysis page -->
+      <div id="analysis-inputs-column" class="column"></div>
+      <div id="analysis-plot-column" class="column">
+          <h3>Signal Analysis Plots</h3>
+          <div class="chart-controls">
+              <div class="chart-control-group">
+              <label for="chartType">Chart Type:</label>
+              <select id="chartType" onchange="updateChart()">
+                  <option value="snr-distance">SNR vs Distance</option>
+                  <option value="power-distance">Received Power vs Distance</option>
+                  <option value="pathloss-distance">Path Loss vs Distance</option>
+                  <option value="outage-distance">Outage Probability vs Distance</option>
+                  <option value="pout-snr">P(outage) vs SNR Threshold</option>
+              </select>
+              </div>
+          </div>
+          <div class="chart-container"> <canvas id="analysisChart"></canvas> </div>
       </div>
-      <div class="output-section">
-        <h4>Signal Analysis</h4>
-        <div class="metric"> <span class="metric-label">Avg Rx Power (Covered):</span> <span class="metric-value" id="avgReceivedPower">0.00 dBm</span> </div>
-        <div class="metric"> <span class="metric-label">Min Rx Power (Covered):</span> <span class="metric-value" id="minReceivedPower">0.00 dBm</span> </div>
-        <div class="metric"> <span class="metric-label">Max Rx Power (Covered):</span> <span class="metric-value" id="maxReceivedPower">0.00 dBm</span> </div>
-        <div class="metric"> <span class="metric-label">Signal Dynamic Range:</span> <span class="metric-value" id="signalRange">0.00 dB</span> </div>
-      </div>
-      <div class="output-section">
-        <h4>Path Loss Analysis</h4>
-        <div class="metric"> <span class="metric-label">Avg Total Path Loss:</span> <span class="metric-value" id="avgPathloss">0.00 dB</span> </div>
-        <div class="metric"> <span class="metric-label">Avg Obstacle Shadow (dB):</span> <span class="metric-value" id="avgShadowLoss">0.00 dB</span> </div>
-        <div class="metric"> <span class="metric-label">Max Coverage Distance:</span> <span class="metric-value" id="maxDistance">0.00 km</span> </div>
-      </div>
-      <div class="output-section">
-        <h4>Environment Impact</h4>
-        <div class="metric"> <span class="metric-label">Environment Factor:</span> <span class="metric-value" id="envFactor">Urban</span> </div>
-        <div class="metric"> <span class="metric-label">Obstacle Count:</span> <span class="metric-value" id="obstacleCount">0</span> </div>
-        <div class="metric"> <span class="metric-label">Shadowing Model:</span> <span class="metric-value" id="shadowingFactor">Obstacle-based</span> </div>
-      </div>
-      <div class="status-indicator" id="systemStatus"> System Status: Excellent Coverage </div>
-    </div>
-  
-    <div id="chart-stats-panel">
-      <h3>Chart Statistics</h3>
-      <div class="output-section">
-          <div class="metric"> <span class="metric-label">Data Points:</span> <span class="metric-value" id="chartDataPoints">0</span> </div>
-          <div class="metric"> <span class="metric-label">Correlation (R²):</span> <span class="metric-value" id="chartCorrelation">N/A</span> </div>
-          <div class="metric"> <span class="metric-label">Trend:</span> <span class="metric-value" id="chartTrend">N/A</span> </div>
-      </div>
-    </div>
+      <div id="analysis-outputs-column" class="column"></div>
+  </div>
+</div>
+
+<!-- This div is a holding pen for panels not currently in use -->
+<div id="panel-holder" style="display: none;">
+  <div id="inputs-panel">
+    <h3>System Parameters</h3>
+    <div class="input-group"> <label for="setting">Environment Type:</label> <select id="setting"> <option value="urban">Urban (High Interference)</option> <option value="suburban">Suburban (Medium)</option> <option value="rural">Rural (Low Interference)</option> </select> </div>
+    <div class="input-group"> <label for="Pt">Transmitter Power (dBm):</label> <input type="number" id="Pt" value="30" min="0" max="50" step="1"> </div>
+    <div class="input-group"> <label for="Pmin">Min Required Power (dBm):</label> <input type="number" id="Pmin" value="-85" min="-120" max="-50" step="1"> </div>
+    <div class="input-group"> <label for="frequency">Frequency (MHz):</label> <input type="number" id="frequency" value="900" min="400" max="6000" step="50"> </div>
+    <div class="input-group"> <label for="noiseFloor">Noise Floor (dBm):</label> <input type="number" id="noiseFloor" value="-100" min="-120" max="-70" step="1"> </div>
+    <div class="input-group"> <label for="obstacleDensity">Obstacle Density (per 100 cells):</label> <input type="number" id="obstacleDensity" value="5" min="0" max="20" step="0.1"> </div>
+    <div class="input-group"> <label>Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
+    <button class="action-button" onclick="clearAll()">Clear All Obstacles</button> 
+    <button class="action-button" onclick="randomObstacles()">Generate Layout from Density</button>
   </div>
 
+  <div id="outputs-panel">
+    <h3>Results & Analysis</h3>
+    <div class="output-section">
+      <h4>Coverage Metrics</h4>
+      <div class="metric"> <span class="metric-label">Outage Probability:</span> <span class="metric-value" id="outageProb">0.00%</span> </div>
+      <div class="progress-bar"> <div class="progress-fill" id="outageProgress" style="width: 0%;"></div> </div>
+      <div class="metric"> <span class="metric-label">Coverage Area:</span> <span class="metric-value" id="coverageArea">100.00%</span> </div>
+      <div class="metric"> <span class="metric-label">Cells in Outage:</span> <span class="metric-value" id="outageCells">0 / 960</span> </div>
+    </div>
+    <div class="output-section">
+      <h4>Signal Analysis</h4>
+      <div class="metric"> <span class="metric-label">Avg Rx Power (Covered):</span> <span class="metric-value" id="avgReceivedPower">0.00 dBm</span> </div>
+      <div class="metric"> <span class="metric-label">Min Rx Power (Covered):</span> <span class="metric-value" id="minReceivedPower">0.00 dBm</span> </div>
+      <div class="metric"> <span class="metric-label">Max Rx Power (Covered):</span> <span class="metric-value" id="maxReceivedPower">0.00 dBm</span> </div>
+      <div class="metric"> <span class="metric-label">Signal Dynamic Range:</span> <span class="metric-value" id="signalRange">0.00 dB</span> </div>
+    </div>
+    <div class="output-section">
+      <h4>Path Loss Analysis</h4>
+      <div class="metric"> <span class="metric-label">Avg Total Path Loss:</span> <span class="metric-value" id="avgPathloss">0.00 dB</span> </div>
+      <div class="metric"> <span class="metric-label">Avg Obstacle Shadow (dB):</span> <span class="metric-value" id="avgShadowLoss">0.00 dB</span> </div>
+      <div class="metric"> <span class="metric-label">Max Coverage Distance:</span> <span class="metric-value" id="maxDistance">0.00 km</span> </div>
+    </div>
+    <div class="output-section">
+      <h4>Environment Impact</h4>
+      <div class="metric"> <span class="metric-label">Environment Factor:</span> <span class="metric-value" id="envFactor">Urban</span> </div>
+      <div class="metric"> <span class="metric-label">Obstacle Count:</span> <span class="metric-value" id="obstacleCount">0</span> </div>
+      <div class="metric"> <span class="metric-label">Shadowing Model:</span> <span class="metric-value" id="shadowingFactor">Obstacle-based</span> </div>
+    </div>
+    <div class="status-indicator" id="systemStatus"> System Status: Excellent Coverage </div>
+  </div>
+
+  <div id="chart-stats-panel">
+    <h3>Chart Statistics</h3>
+    <div class="output-section">
+        <div class="metric"> <span class="metric-label">Data Points:</span> <span class="metric-value" id="chartDataPoints">0</span> </div>
+        <div class="metric"> <span class="metric-label">Correlation (R²):</span> <span class="metric-value" id="chartCorrelation">N/A</span> </div>
+        <div class="metric"> <span class="metric-label">Trend:</span> <span class="metric-value" id="chartTrend">N/A</span> </div>
+    </div>
+  </div>
+</div>
 
   <!-- Make sure the script is loaded at the end of the body -->
   <script src="./js/main.js">
