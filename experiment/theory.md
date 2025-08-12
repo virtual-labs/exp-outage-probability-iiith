@@ -1,5 +1,9 @@
 In previous experiments, we explored fundamental concepts like pathloss and shadowing, which significantly influence wireless system design. In wireless communication, maintaining a minimum level of received power is crucial—for instance, ensuring cellular voice quality remains above a specific threshold. However, pathloss and shadowing introduce attenuation effects that impact received power. To effectively characterize this fading phenomenon, a comprehensive understanding of outage and coverage becomes essential. 
 
+<p align="center">
+<img src="./images/exp2.png" width="430">
+</p>
+
 ## Outage Probability, $P_{out}$
 Outage probability is a critical metric in wireless communication systems, representing the likelihood that the received signal power falls below a specified threshold, making the communication link unreliable. In practical terms, it quantifies the probability that a user will experience poor connectivity or dropped calls. Mathematically, it is a function of the target minimum received power, $P_{min}$ (threshold) and the received power at a distance, d, and can be written as
 
