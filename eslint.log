@@ -1,0 +1,12 @@
+
+/home/runner/work/exp-outage-probability-iiith/exp-outage-probability-iiith/experiment/simulation/js/main.js
+   73:1   warning  'updatePathlossAndMetrics' is a function      no-func-assign
+  479:25  warning  Irregular whitespace not allowed              no-irregular-whitespace
+  480:25  warning  Irregular whitespace not allowed              no-irregular-whitespace
+  527:10  warning  'randomObstacles' is defined but never used   no-unused-vars
+  561:23  warning  'Chart' is not defined                        no-undef
+  614:13  warning  Unexpected lexical declaration in case block  no-case-declarations
+  619:13  warning  Unexpected lexical declaration in case block  no-case-declarations
+
+✖ 7 problems (0 errors, 7 warnings)
+
