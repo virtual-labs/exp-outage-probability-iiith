@@ -18,6 +18,23 @@
 
 <div class="page-container">
   <div id="simulation-page" class="page-content active">
+      <!-- Add show instructions button -->
+      <button class="show-instructions-btn" onclick="toggleInstructions('simulation')">Show Instructions</button>
+      
+      <!-- Instructions panel (hidden by default) -->
+      <div class="instructions-panel hidden">
+          <h3>Instructions</h3>
+          <ol>
+              <li>Use the <strong>System Parameters</strong> panel to set up your wireless environment</li>
+              <li>Place obstacles in the grid by clicking on cells (use the Click Mode buttons)</li>
+              <li>The transmitter (center) broadcasts signal to all cells in the grid</li>
+              <li>Green indicates strong signal, yellow is medium, and red is weak</li>
+              <li>Cells with red borders are in "outage" (signal too weak to maintain connection)</li>
+              <li>View the coverage metrics and analysis in the right panel</li>
+              <li>Try different environments and obstacle patterns to see how they affect coverage</li>
+          </ol>
+          <button class="close-instructions-btn" onclick="toggleInstructions('simulation')">Hide Instructions</button>
+      </div>
       <!-- The three columns for the simulation page -->
       <div id="simulation-inputs-column" class="column"></div>
       <div id="simulation-column" class="column">
@@ -38,6 +55,24 @@
   </div>
   
   <div id="analysis-page" class="page-content">
+      <!-- Add show instructions button -->
+      <button class="show-instructions-btn" onclick="toggleInstructions('analysis')">Show Instructions</button>
+      
+      <!-- Instructions panel (hidden by default) -->
+      <div class="instructions-panel hidden">
+          <h3>Instructions</h3>
+          <ol>
+              <li>Select a chart type from the dropdown menu</li>
+              <li>The plots show relationships between distance, signal strength, and outage probability</li>
+              <li>Each point represents a cell from the grid simulation</li>
+              <li>"SNR vs Distance" shows how signal-to-noise ratio changes with distance</li>
+              <li>"Received Power vs Distance" shows power decay with distance</li>
+              <li>"Path Loss vs Distance" shows signal degradation over distance</li>
+              <li>"P(outage) vs SNR Threshold" shows probability of outage at different SNR levels</li>
+              <li>Changes to obstacles in the simulation tab will affect these plots</li>
+          </ol>
+          <button class="close-instructions-btn" onclick="toggleInstructions('analysis')">Hide Instructions</button>
+      </div>
       <!-- The three columns for the analysis page -->
       <div id="analysis-inputs-column" class="column"></div>
       <div id="analysis-plot-column" class="column">
@@ -49,7 +84,7 @@
                   <option value="snr-distance">SNR vs Distance</option>
                   <option value="power-distance">Received Power vs Distance</option>
                   <option value="pathloss-distance">Path Loss vs Distance</option>
-                  <option value="outage-distance">Outage Probability vs Distance</option>
+        
                   <option value="pout-snr">P(outage) vs SNR Threshold</option>
               </select>
               </div>
@@ -117,9 +152,25 @@
 </div>
 
   <!-- Make sure the script is loaded at the end of the body -->
-  <script src="./js/main.js">
-		
-	</script>
+  <script src="./js/main.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/virtual-labs/virtual-style@0.0.8-b/js/script.js"></script>
+  
+  <!-- Add script to handle showing/hiding instructions -->
+  <script>
+    function toggleInstructions(tabName) {
+      const instructionsPanel = document.querySelector(`#${tabName}-page .instructions-panel`);
+      const showButton = document.querySelector(`#${tabName}-page .show-instructions-btn`);
+      
+      if (instructionsPanel.classList.contains('hidden')) {
+        // Show instructions
+        instructionsPanel.classList.remove('hidden');
+        showButton.style.display = 'none'; // Hide the "Show Instructions" button
+      } else {
+        // Hide instructions
+        instructionsPanel.classList.add('hidden');
+        showButton.style.display = 'block'; // Show the "Show Instructions" button
+      }
+    }
+  </script>
 </body>
 </html>

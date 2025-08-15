@@ -53,7 +53,7 @@
     }
 
     .page-container {
-      flex-grow: 1;
+      flex-grow:1;
       position: relative;
       background-color: white;
     }
@@ -65,7 +65,7 @@
     .page-content.active {
         display: grid; 
         grid-template-columns: 320px 1fr 350px;
-        gap: 10px;
+        gap: 3px;
     }
     
     .column {
@@ -73,7 +73,7 @@
         border-radius: 15px;
         background: #f8f9fa;
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        padding: 20px;
+      
     }
     
     #simulation-column {
@@ -165,17 +165,16 @@
       overflow: hidden; 
       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       background: #333; 
-      flex-shrink: 0; 
+
       cursor: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTUgMkM0LjQ0NzcyIDIgNCAyLjQ0NzcyIDQgM1YyMUM0IDIxLjU1MjMgNC40NDc3MiAyMiA1IDIySDEzQzEzLjU1MjMgMjIgMTQgMjEuNTUyMyAxNCAyMVYzQzE0IDIuNDQ3NzIgMTMuNTUyMyAyIDEzIDJINVoiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSIjZmZmIi8+CjxwYXRoIGQ9Ik03IDE5SDExIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+Cjwvc3ZnPgo=') 12 12, auto;
       aspect-ratio: 1 / 1;
-      max-width: 90vw;
       margin: 0 auto;
       display: grid;
     }
 
     .cell {
-      width: 18px; 
-      height: 18px; 
+      width: 20px; 
+      height: 20px; 
       border: none; 
       transition: background-color 0.1s ease, transform 0.2s ease; 
       position: relative;
@@ -255,8 +254,105 @@
     .chart-control-group { display: flex; flex-direction: column; gap: 5px; }
     .chart-control-group label { font-size: 0.85em; font-weight: 600; color: #495057; }
 
+.instructions-panel {
+    grid-column: 1 / -1;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-left: 5px solid #17a2b8;
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom:  10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Hidden state styling */
+.instructions-panel.hidden {
+    max-height: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    overflow: hidden;
+}
+
+.instructions-panel.hidden * {
+    display: none;
+}
+
+.instructions-panel h3 {
+    color: #17a2b8;
+    font-size: 1.2em;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.instructions-panel ol {
+    padding-left: 25px;
+    margin: 0 0 15px 0;
+}
+
+.instructions-panel li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+    color: #495057;
+}
+
+.instructions-panel strong {
+    color: #212529;
+}
+
+.close-instructions-btn {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    cursor: pointer;
+    float: right;
+    transition: background-color 0.2s;
+}
+
+.close-instructions-btn:hover {
+    background-color: #138496;
+}
+
+.instructions-panel.hidden {
+    max-height: 50px;
+    padding: 10px 20px;
+    overflow: hidden;
+}
+
+.instructions-panel.hidden ol {
+    display: none;
+}
+
+/* Show Instructions Button */
+.show-instructions-btn {
+    grid-column: 1 / -1;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.show-instructions-btn:hover {
+    background-color: #138496;
+}
+
+
+
 /* Add Mobile Responsiveness */
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 800px) {
     .main-tasks-container {
         padding: 5px 10px 0;
         gap: 2px;
@@ -273,20 +369,16 @@
         gap: 15px;
     }
     
-    .column {
-        padding: 15px;
-        border-radius: 10px;
-    }
+  
     
     .input-group {
         padding: 12px;
     }
-    
-    /* Make grid container responsive */
+
     .grid-container {
         width: 100% !important;
         height: auto !important;
-        /* max-width: 320px; */
+        max-width: 320px;
         transform: scale(0.85);
         transform-origin: top center;
     }
@@ -299,7 +391,6 @@
     /* Adjust legend size */
     .legend {
         width: 100%;
-        padding: 10px;
         gap: 8px;
     }
     
@@ -369,8 +460,8 @@
     
     /* Fix touch interaction issues */
     .cell {
-        width: 16px; /* Slightly larger for touch */
-        height: 16px;
+        width: 10px; /* Slightly larger for touch */
+        height: 10px;
         touch-action: manipulation;
     }
     
@@ -394,11 +485,7 @@
         padding: 5px;
     }
     
-    .column {
-        padding: 12px;
-        margin-bottom: 15px;
-    }
-    
+ 
     /* Improve form controls for touch */
     input, select {
         padding: 12px;
@@ -428,78 +515,204 @@
     }
 }
 
-/* Add even smaller screen optimizations */
+/* Enhanced mobile responsiveness for very small screens */
 @media screen and (max-width: 375px) {
+    .main-tasks-container {
+        padding: 3px 5px 0;
+        gap: 1px;
+    }
+    
     .main-task-btn {
-        padding: 8px 8px;
+        padding: 8px 6px;
         font-size: 0.8em;
+    }
+    
+    .page-content.active {
+        padding: 2px;
+    }
+    
+
+    
+    #simulation-column {
+        padding: 10px 5px;
+    }
+    
+    .input-group {
+        padding: 10px;
+        margin-bottom: 10px;
     }
     
     h3 {
         font-size: 1.1em;
+        margin-bottom: 10px;
     }
     
-    .grid-container {
-        transform: scale(0.75);
-    }
-    
-    /* Further optimize layout elements */
-    .output-section h4 {
-        font-size: 1em;
+    .legend {
+        width: 100%;
+        max-width: 300px;
+        margin: 10px auto 0;
     }
     
     .legend h4 {
+        margin-bottom: 5px;
         font-size: 0.9em;
     }
-
-    /* More aggressive adjustments */
-    .grid-container {
-        transform: scale(0.55);
-        margin-top: -20px; /* Negative margin to save space */
-        margin-bottom: -20px;
-    }
     
-    /* Make text smaller on very small screens */
-    body {
-        font-size: 14px;
-    }
-    
-    /* Further simplify UI */
     .legend-item {
         font-size: 0.7em;
     }
     
-    /* Stack buttons for better touch access */
-    .mode-buttons {
-        grid-template-columns: 1fr;
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        margin-right: 4px;
     }
-
+    
     .grid-container {
-        width: min(95vw, 300px) !important;
-        margin: 0 auto 10px;
+        width: 100% !important;
+        height: auto !important;
+        transform: scale(1);
+        margin: 0 auto;
+        border-width: 2px;
     }
-}
-
-/* Additional class for touch devices */
-.touch-device .cell {
-    transition: none; /* Remove hover transitions on touch devices */
-}
-
-.touch-device .cell:active {
-    transform: scale(1.1);
-    z-index: 10;
-}
-
-/* Fix for touch devices to ensure elements are not too small */
-.touch-device .mode-btn,
-.touch-device .action-button {
-    padding: 15px 10px;
-    margin-bottom: 10px;
-}
-
-/* Fix for charts on mobile */
-@media screen and (max-width: 600px) {
+    
+    /* Make the chart smaller */
     .chart-container {
-        height: 250px; /* Shorter height on mobile */
+        height: 250px;
+        padding: 8px;
+    }
+    
+    .chart-controls {
+        padding: 8px;
+        gap: 10px;
+    }
+    
+    /* Smaller form elements */
+    input, select {
+        padding: 8px;
+    }
+    
+    /* Adjust output metrics */
+    .output-section {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .metric {
+        padding: 4px 0;
+    }
+    
+    /* Smaller instructions panel */
+    .instructions-panel {
+        padding: 10px;
+    }
+    
+    .instructions-panel h3 {
+        font-size: 1em;
+    }
+    
+    .instructions-panel li {
+        font-size: 0.85em;
+        margin-bottom: 5px;
+    }
+    
+    .show-instructions-btn, 
+    .close-instructions-btn {
+        padding: 8px;
+        font-size: 0.85em;
     }
 }
+
+/* Ultra-small screens (300px width) */
+@media screen and (max-width: 320px) {
+    body {
+        font-size: 14px;
+    }
+    
+    .main-tasks-container {
+        padding: 2px 3px 0;
+    }
+    
+    .main-task-btn {
+        padding: 6px 4px;
+        font-size: 0.75em;
+    }
+    
+    .page-content.active {
+        padding: 1px;
+    }
+    
+    .column {
+        padding: 8px 5px;
+    }
+    
+    #simulation-column {
+        padding: 8px 2px;
+    }
+    
+    .grid-container {
+        border-width: 1px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .cell {
+        min-width: 10px;
+        min-height: 10px;
+    }
+    
+    /* Even smaller form elements */
+    label {
+        font-size: 0.8em;
+        margin-bottom: 4px;
+    }
+    
+    input, select {
+        padding: 6px;
+        font-size: 14px;
+    }
+    
+    .action-button {
+        padding: 10px;
+        margin-top: 10px;
+        font-size: 0.9em;
+    }
+    
+    .mode-buttons {
+        gap: 3px;
+    }
+    
+    .mode-btn {
+        padding: 8px 3px;
+        font-size: 0.75em;
+    }
+    
+    /* Maximize chart space */
+    .chart-container {
+        height: 200px;
+        padding: 5px;
+    }
+    
+    /* Even smaller legend */
+    .legend {
+        padding: 5px;
+        gap: 3px;
+    }
+    
+    .legend-item {
+        font-size: 0.65em;
+    }
+    
+    .legend-color {
+        width: 10px;
+        height: 10px;
+        margin-right: 3px;
+    }
+    
+    /* Fix small screen buttons */
+    button {
+        min-height: 36px;
+    }
+}
+
+
