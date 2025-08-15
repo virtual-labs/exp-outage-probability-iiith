@@ -19,6 +19,29 @@ function initialize() {
   switchMainTask('simulation'); 
   updatePathlossAndMetrics();
   loadChartJS();
+
+  // Add mobile grid adjustment
+  adjustGridForMobile();
+  window.addEventListener('resize', adjustGridForMobile);
+}
+
+// Add this function to ensure proper grid display on mobile
+function adjustGridForMobile() {
+  const gridContainer = document.getElementById('grid-container');
+  const containerWidth = gridContainer.parentElement.clientWidth;
+  
+  if (window.innerWidth <= 600) {
+    // For mobile screens
+    const scaleFactor = Math.min(0.9, (containerWidth - 20) / (cols * gridSize));
+    gridContainer.style.transform = `scale(${scaleFactor})`;
+    gridContainer.style.transformOrigin = 'center top';
+    gridContainer.style.marginBottom = `${(rows * gridSize * (1 - scaleFactor))}px`;
+  } else {
+    // Reset for larger screens
+    gridContainer.style.transform = '';
+    gridContainer.style.transformOrigin = '';
+    gridContainer.style.marginBottom = '';
+  }
 }
 
 function switchMainTask(taskName) {
