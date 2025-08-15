@@ -232,11 +232,19 @@
     .status-poor { background-color: #dc3545; }
 
     .legend {
-      margin-top: 20px; padding: 15px; background: white;
-      border-radius: 10px; border: 1px solid #dee2e6;
-      width: 558px; display: flex; flex-wrap: wrap; justify-content: center; 
-      gap: 15px; align-items: center; 
+      margin-top: 5px; /* Reduced from 20px to 5px */
+      padding: 15px; 
+      background: white;
+      border-radius: 10px; 
+      border: 1px solid #dee2e6;
+      width: 558px; 
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      gap: 15px; 
+      align-items: center; 
     }
+
     .legend h4 { margin: 0 0 12px 0; color: #343a40; font-size: 1em; font-weight: 600; flex-basis: 100%; text-align: center; }
     .legend-item { display: flex; align-items: center; margin: 0; font-size: 0.85em; color: #495057; }
     .legend-color { width: 20px; height: 20px; border-radius: 4px; margin-right: 10px; border: 1px solid #ced4da; flex-shrink: 0; }
@@ -351,7 +359,23 @@
 
 
 
-/* Add Mobile Responsiveness */
+/* Responsive Design - Large Screens */
+@media screen and (max-width: 1200px) {
+    .page-content.active {
+        grid-template-columns: 300px 1fr 320px;
+        gap: 5px;
+    }
+    
+    .legend {
+        width: 100%;
+    }
+    
+    .chart-container {
+        height: 450px;
+    }
+}
+
+/* Responsive Design - Medium Screens */
 @media screen and (max-width: 800px) {
     .main-tasks-container {
         padding: 5px 10px 0;
@@ -369,29 +393,101 @@
         gap: 15px;
     }
     
-  
-    
     .input-group {
         padding: 12px;
     }
-
+    
+    .legend {
+        width: 100%;
+        gap: 10px;
+    }
+    
+    /* Chart responsiveness */
+    .chart-controls {
+        padding: 12px;
+        gap: 15px;
+    }
+    
+    .chart-container {
+        height: 350px;
+        padding: 15px;
+    }
+    
+    /* Make buttons more touch-friendly */
+    .action-button {
+        padding: 15px;
+    }
+    
     .grid-container {
-        width: 100% !important;
+        width: min(90vw, 450px) !important;
         height: auto !important;
-        max-width: 320px;
-        transform: scale(0.85);
-        transform-origin: top center;
+        transform: scale(0.9);
+        transform-origin: center top;
+        margin: 0 auto;
+    }
+}
+
+/* Responsive Design - Small Screens */
+@media screen and (max-width: 500px) {
+    .main-tasks-container {
+        padding: 3px 5px 0;
+        gap: 1px;
+    }
+    
+    .main-task-btn {
+        padding: 10px 8px;
+        font-size: 0.85em;
+        min-height: 48px; /* Good minimum size for touch targets */
+    }
+    
+    .page-content.active {
+        padding: 5px;
+    }
+    
+    .column {
+        padding: 10px;
+        border-radius: 10px;
+    }
+    
+    #simulation-column {
+        padding: 10px 2px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .grid-container {
+        width: 95vw !important;
+        max-width: 300px !important;
+        height: auto !important;
+        transform: scale(1);
+        border-width: 2px;
+        touch-action: manipulation;
+        margin: 0 auto;
+    }
+    
+    .legend {
+        margin-top: 0;
+        padding: 8px 5px;
+        gap: 5px;
+        max-width: 95vw;
+    }
+    
+    .legend h4 {
+        margin: 0 0 5px 0;
+        font-size: 0.9em;
     }
     
     .cell {
-        width: 5px;
-        height: 5px;
+        width: 100%;
+        height: 100%;
+        min-width: 15px;
+        min-height: 15px;
     }
     
-    /* Adjust legend size */
-    .legend {
-        width: 100%;
-        gap: 8px;
+    .cell:hover {
+        transform: scale(1.1);
     }
     
     .legend-item {
@@ -404,30 +500,9 @@
         margin-right: 5px;
     }
     
-    /* Chart responsiveness */
-    .chart-controls {
-        padding: 12px;
-        gap: 15px;
-    }
-    
     .chart-container {
         height: 300px;
         padding: 10px;
-    }
-    
-    /* Make buttons more touch-friendly */
-    .action-button {
-        padding: 15px;
-        font-size: 1em;
-    }
-    
-    .mode-buttons {
-        gap: 5px;
-    }
-    
-    .mode-btn {
-        padding: 12px 5px;
-        font-size: 0.85em;
     }
     
     /* Adjust metric displays */
@@ -437,194 +512,47 @@
         gap: 5px;
     }
     
-    .metric-value {
-        font-size: 0.9em;
-    }
-    
-    /* Adjust tooltips for touch */
-    .tooltip {
-        padding: 8px 12px;
-        font-size: 11px;
-    }
-
-    /* Better grid handling for mobile */
-    .grid-container {
-        width: 100% !important;
-        height: auto !important;
-        max-width: 300px;
-        transform: scale(0.65);
-        transform-origin: center top;
-        margin: 0 auto;
-        touch-action: manipulation; /* Improve touch handling */
-    }
-    
-    /* Fix touch interaction issues */
-    .cell {
-        width: 10px; /* Slightly larger for touch */
-        height: 10px;
-        touch-action: manipulation;
-    }
-    
-    .cell:hover {
-        transform: scale(1.1); /* Smaller hover effect on mobile */
-    }
-    
-    /* Make touch targets bigger */
-    .main-task-btn {
-        padding: 15px 10px;
-        min-height: 48px; /* Good minimum size for touch targets */
-    }
-    
-    /* Fix scroll issues */
-    body {
-        overflow-x: hidden;
-    }
-    
-    /* Better padding for small screens */
-    .page-content {
-        padding: 5px;
-    }
-    
- 
     /* Improve form controls for touch */
     input, select {
         padding: 12px;
-        font-size: 16px; /* Prevents iOS zoom on focus */
-    }
-    
-    /* Improve buttons for touch */
-    button, .action-button {
-        min-height: 44px;
-    }
-
-    .grid-container {
-        aspect-ratio: 1 / 1;
-        width: min(90vw, 320px) !important;
-        height: auto !important;
-        transform-origin: center;
-        transform: scale(1); /* Will be set by JS */
-        margin: 0 auto;
-    }
-    
-    .cell {
-        width: 100%;
-        height: 100%;
-        min-width: 15px;
-        min-height: 15px;
-        touch-action: manipulation;
+        font-size: 16px;
     }
 }
 
 /* Enhanced mobile responsiveness for very small screens */
 @media screen and (max-width: 375px) {
-    .main-tasks-container {
-        padding: 3px 5px 0;
-        gap: 1px;
-    }
-    
-    .main-task-btn {
-        padding: 8px 6px;
-        font-size: 0.8em;
-    }
-    
-    .page-content.active {
-        padding: 2px;
-    }
-    
-
-    
     #simulation-column {
-        padding: 10px 5px;
-    }
-    
-    .input-group {
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-    
-    h3 {
-        font-size: 1.1em;
-        margin-bottom: 10px;
-    }
-    
-    .legend {
-        width: 100%;
-        max-width: 300px;
-        margin: 10px auto 0;
-    }
-    
-    .legend h4 {
-        margin-bottom: 5px;
-        font-size: 0.9em;
-    }
-    
-    .legend-item {
-        font-size: 0.7em;
-    }
-    
-    .legend-color {
-        width: 12px;
-        height: 12px;
-        margin-right: 4px;
+        padding: 5px 0;
     }
     
     .grid-container {
         width: 100% !important;
-        height: auto !important;
-        transform: scale(1);
+        max-width: 270px !important;
+        border-width: 1px;
         margin: 0 auto;
-        border-width: 2px;
     }
     
-    /* Make the chart smaller */
-    .chart-container {
-        height: 250px;
-        padding: 8px;
+    .legend {
+        padding: 5px 3px;
+        margin: 0 auto;
+        gap: 3px;
+        width: 100%;
+        max-width: 270px;
     }
     
-    .chart-controls {
-        padding: 8px;
-        gap: 10px;
+    .legend-item {
+        font-size: 0.65em;
     }
     
-    /* Smaller form elements */
-    input, select {
-        padding: 8px;
-    }
-    
-    /* Adjust output metrics */
-    .output-section {
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-    
-    .metric {
-        padding: 4px 0;
-    }
-    
-    /* Smaller instructions panel */
-    .instructions-panel {
-        padding: 10px;
-    }
-    
-    .instructions-panel h3 {
-        font-size: 1em;
-    }
-    
-    .instructions-panel li {
-        font-size: 0.85em;
-        margin-bottom: 5px;
-    }
-    
-    .show-instructions-btn, 
-    .close-instructions-btn {
-        padding: 8px;
-        font-size: 0.85em;
+    .legend-color {
+        width: 10px;
+        height: 10px;
+        margin-right: 3px;
     }
 }
 
-/* Ultra-small screens (300px width) */
-@media screen and (max-width: 320px) {
+/* Ultra-small screens */
+@media screen and (max-width: 300px) {
     body {
         font-size: 14px;
     }
@@ -639,29 +567,52 @@
     }
     
     .page-content.active {
-        padding: 1px;
+        padding: 2px;
     }
     
     .column {
-        padding: 8px 5px;
+        padding: 5px 2px;
+        border-radius: 8px;
     }
     
     #simulation-column {
-        padding: 8px 2px;
+        padding: 5px 0;
     }
     
     .grid-container {
+        width: 95% !important;
+        max-width: 250px !important;
+        transform: scale(0.95);
         border-width: 1px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .legend {
+        margin-top: 0;
+        padding: 4px 2px;
+        width: 95%;
+        max-width: 250px;
+    }
+    
+    .legend h4 {
+        margin-bottom: 3px;
+        font-size: 0.8em;
+    }
+    
+    .legend-item {
+        font-size: 0.6em;
+    }
+    
+    .legend-color {
+        width: 8px;
+        height: 8px;
+        margin-right: 2px;
     }
     
     .cell {
-        min-width: 10px;
-        min-height: 10px;
+        min-width: 8px;
+        min-height: 8px;
     }
     
-    /* Even smaller form elements */
     label {
         font-size: 0.8em;
         margin-bottom: 4px;
@@ -672,47 +623,14 @@
         font-size: 14px;
     }
     
-    .action-button {
+    .action-button, button {
         padding: 10px;
-        margin-top: 10px;
-        font-size: 0.9em;
+        min-height: 36px;
+        font-size: 0.85em;
     }
     
-    .mode-buttons {
-        gap: 3px;
-    }
-    
-    .mode-btn {
-        padding: 8px 3px;
-        font-size: 0.75em;
-    }
-    
-    /* Maximize chart space */
     .chart-container {
         height: 200px;
         padding: 5px;
     }
-    
-    /* Even smaller legend */
-    .legend {
-        padding: 5px;
-        gap: 3px;
-    }
-    
-    .legend-item {
-        font-size: 0.65em;
-    }
-    
-    .legend-color {
-        width: 10px;
-        height: 10px;
-        margin-right: 3px;
-    }
-    
-    /* Fix small screen buttons */
-    button {
-        min-height: 36px;
-    }
 }
-
-
