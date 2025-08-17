@@ -1,176 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Outage Probability and Plotting Lab</title>
-  <link rel="stylesheet" href="css/main.css">
-	<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-		crossorigin="anonymous"> -->
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Outage Probability and Plotting Lab</title>
+	<link rel="stylesheet" href="css/main.css">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/virtual-labs/virtual-style@0.0.8-b/css/style.min.css">
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="main-tasks-container">
-    <button id="simulation-task-btn" class="main-task-btn active" onclick="switchMainTask('simulation')">Outage Probability Analysis</button>
-    <button id="analysis-task-btn" class="main-task-btn" onclick="switchMainTask('analysis')">Plots</button>
+ <div class="main-tasks-container">
+<button id="simulation-task-btn" class="main-task-btn active" onclick="switchMainTask('simulation')">Outage Probability Analysis</button>
+<button id="analysis-task-btn" class="main-task-btn" onclick="switchMainTask('analysis')">Plots</button>
 </div>
 
 <div class="page-container">
-  <div id="simulation-page" class="page-content active">
-      <!-- Add show instructions button -->
-      <button class="show-instructions-btn" onclick="toggleInstructions('simulation')">Show Instructions</button>
-      
-      <!-- Instructions panel (hidden by default) -->
-      <div class="instructions-panel hidden">
-          <h3>Instructions</h3>
-          <ol>
-              <li>Use the <strong>System Parameters</strong> panel to set up your wireless environment</li>
-              <li>Place obstacles in the grid by clicking on cells (use the Click Mode buttons)</li>
-              <li>The transmitter (center) broadcasts signal to all cells in the grid</li>
-              <li>Green indicates strong signal, yellow is medium, and red is weak</li>
-              <li>Cells with red borders are in "outage" (signal too weak to maintain connection)</li>
-              <li>View the coverage metrics and analysis in the right panel</li>
-              <li>Try different environments and obstacle patterns to see how they affect coverage</li>
-          </ol>
-          <button class="close-instructions-btn" onclick="toggleInstructions('simulation')">Hide Instructions</button>
-      </div>
-      <!-- The three columns for the simulation page -->
-      <div id="simulation-inputs-column" class="column"></div>
-      <div id="simulation-column" class="column">
-          <div class="grid-container" id="grid-container"></div> 
-          <div class="legend"> 
-              <h4>Legend</h4>
-              <div class="legend-item"> <div class="legend-color transmitter"></div> <span>Transmitter</span> </div>
-              <div class="legend-item"> <div class="legend-color" style="background: linear-gradient(45deg, #555, #777);"></div> <span>Normal Obstacle</span> </div> 
-              <div class="legend-item"> <div class="legend-color" style="background: linear-gradient(45deg, #7A0000, #C01030);"></div> <span>Heavy Obstacle</span> </div>
-              <div class="legend-item"> <div class="legend-color" style="background: #00ff00;"></div> <span>Strong Signal</span> </div> 
-              <div class="legend-item"> <div class="legend-color" style="background: #ffff00;"></div> <span>Medium Signal</span> </div> 
-              <div class="legend-item"> <div class="legend-color" style="background: #ff0000;"></div> <span>Weak Signal</span> </div> 
-              <div class="legend-item"> <div class="legend-color" style="box-shadow: inset 0 0 0 1px #dd0033;"></div> <span>Outage</span> </div> 
-              <div class="legend-item"> <div class="legend-color" style="background-color: rgba(0,0,0,0.15); border: 1px dashed #555;"></div> <span>Shadow Tinge</span> </div> 
-          </div>
-      </div>
-      <div id="simulation-outputs-column" class="column"></div>
-  </div>
-  
-  <div id="analysis-page" class="page-content">
-      <!-- Add show instructions button -->
-      <button class="show-instructions-btn" onclick="toggleInstructions('analysis')">Show Instructions</button>
-      
-      <!-- Instructions panel (hidden by default) -->
-      <div class="instructions-panel hidden">
-          <h3>Instructions</h3>
-          <ol>
-              <li>Select a chart type from the dropdown menu</li>
-              <li>The plots show relationships between distance, signal strength, and outage probability</li>
-              <li>Each point represents a cell from the grid simulation</li>
-              <li>"SNR vs Distance" shows how signal-to-noise ratio changes with distance</li>
-              <li>"Received Power vs Distance" shows power decay with distance</li>
-              <li>"Path Loss vs Distance" shows signal degradation over distance</li>
-              <li>"P(outage) vs SNR Threshold" shows probability of outage at different SNR levels</li>
-              <li>Changes to obstacles in the simulation tab will affect these plots</li>
-          </ol>
-          <button class="close-instructions-btn" onclick="toggleInstructions('analysis')">Hide Instructions</button>
-      </div>
-      <!-- The three columns for the analysis page -->
-      <div id="analysis-inputs-column" class="column"></div>
-      <div id="analysis-plot-column" class="column">
-          <h3>Signal Analysis Plots</h3>
-          <div class="chart-controls">
-              <div class="chart-control-group">
-              <label for="chartType">Chart Type:</label>
-              <select id="chartType" onchange="updateChart()">
-                  <option value="snr-distance">SNR vs Distance</option>
-                  <option value="power-distance">Received Power vs Distance</option>
-                  <option value="pathloss-distance">Path Loss vs Distance</option>
-        
-                  <option value="pout-snr">P(outage) vs SNR Threshold</option>
-              </select>
-              </div>
-          </div>
-          <div class="chart-container"> <canvas id="analysisChart"></canvas> </div>
-      </div>
-      <div id="analysis-outputs-column" class="column"></div>
-  </div>
+ <div id="simulation-page" class="page-content active">
+<button class="show-instructions-btn" onclick="toggleInstructions('simulation')">Show Instructions</button>
+ 
+<div class="instructions-panel hidden">
+ <h3>Instructions</h3>
+ <ol>
+ <li>Use the <strong>System Parameters</strong> panel to set up your wireless environment</li>
+ <li>Place obstacles in the grid by clicking on cells (use the Click Mode buttons)</li>
+ <li>The transmitter (center) broadcasts signal to all cells in the grid</li>
+ <li>Green indicates strong signal, yellow is medium, and red is weak</li>
+ <li>Cells with red borders are in "outage" (signal too weak to maintain connection)</li>
+ <li>View the coverage metrics and analysis in the right panel</li>
+ <li>Try different environments and obstacle patterns to see how they affect coverage</li>
+ </ol>
+ <button class="close-instructions-btn" onclick="toggleInstructions('simulation')">Hide Instructions</button>
+ </div>
+<div id="simulation-inputs-column" class="column"></div>
+ <div id="simulation-column" class="column">
+ <div class="grid-container" id="grid-container"></div> 
+ <div class="legend"> 
+ <h4>Legend</h4>
+ <div class="legend-item"> <div class="legend-color transmitter"></div> <span>Transmitter</span> </div>
+ <div class="legend-item"> <div class="legend-color" style="background: linear-gradient(45deg, #555, #777);"></div> <span>Normal Obstacle</span> </div> 
+ <div class="legend-item"> <div class="legend-color" style="background: linear-gradient(45deg, #7A0000, #C01030);"></div> <span>Heavy Obstacle</span> </div>
+ <div class="legend-item"> <div class="legend-color" style="background: #00ff00;"></div> <span>Strong Signal</span> </div> 
+ <div class="legend-item"> <div class="legend-color" style="background: #ffff00;"></div> <span>Medium Signal</span> </div> 
+ <div class="legend-item"> <div class="legend-color" style="background: #ff0000;"></div> <span>Weak Signal</span> </div> 
+ <div class="legend-item"> <div class="legend-color" style="box-shadow: inset 0 0 0 1px #dd0033;"></div> <span>Outage</span> </div> 
+ <div class="legend-item"> <div class="legend-color" style="background-color: rgba(0,0,0,0.15); border: 1px dashed #555;"></div> <span>Shadow Tinge</span> </div> 
+ </div>
+ </div>
+ <div id="simulation-outputs-column" class="column"></div>
+ </div>
+ 
+ <div id="analysis-page" class="page-content">
+<button class="show-instructions-btn" onclick="toggleInstructions('analysis')">Show Instructions</button>
+ 
+<div class="instructions-panel hidden">
+ <h3>Instructions</h3>
+ <ol>
+ <li>Select a chart type from the dropdown menu</li>
+ <li>The plots show relationships between distance, signal strength, and outage probability</li>
+ <li>Each point represents a cell from the grid simulation</li>
+ <li>"SNR vs Distance" shows how signal-to-noise ratio changes with distance</li>
+ <li>"Received Power vs Distance" shows power decay with distance</li>
+ <li>"Path Loss vs Distance" shows signal degradation over distance</li>
+ <li>"P(outage) vs SNR Threshold" shows probability of outage at different SNR levels</li>
+ <li>Changes to obstacles in the simulation tab will affect these plots</li>
+ </ol>
+ <button class="close-instructions-btn" onclick="toggleInstructions('analysis')">Hide Instructions</button>
+ </div>
+<div id="analysis-inputs-column" class="column"></div>
+ <div id="analysis-plot-column" class="column">
+ <h3>Signal Analysis Plots</h3>
+ <div class="chart-controls">
+ <div class="chart-control-group">
+ <label for="chartType">Chart Type:</label>
+ <select id="chartType" onchange="updateChart()">
+ <option value="snr-distance">SNR vs Distance</option>
+ <option value="power-distance">Received Power vs Distance</option>
+ <option value="pathloss-distance">Path Loss vs Distance</option>
+
+ <option value="pout-snr">P(outage) vs SNR Threshold</option>
+ </select>
+ </div>
+ </div>
+ <div class="chart-container"> <canvas id="analysisChart"></canvas> </div>
+ </div>
+ <div id="analysis-outputs-column" class="column"></div>
+ </div>
 </div>
 
-<!-- This div is a holding pen for panels not currently in use -->
 <div id="panel-holder" style="display: none;">
-  <div id="inputs-panel">
-    <h3>System Parameters</h3>
-    <div class="input-group"> <label for="setting">Environment Type:</label> <select id="setting"> <option value="urban">Urban (High Interference)</option> <option value="suburban">Suburban (Medium)</option> <option value="rural">Rural (Low Interference)</option> </select> </div>
-    <div class="input-group"> <label for="Pt">Transmitter Power (dBm):</label> <input type="number" id="Pt" value="30" min="0" max="50" step="1"> </div>
-    <div class="input-group"> <label for="Pmin">Min Required Power (dBm):</label> <input type="number" id="Pmin" value="-85" min="-120" max="-50" step="1"> </div>
-    <div class="input-group"> <label for="frequency">Frequency (MHz):</label> <input type="number" id="frequency" value="900" min="400" max="6000" step="50"> </div>
-    <div class="input-group"> <label for="noiseFloor">Noise Floor (dBm):</label> <input type="number" id="noiseFloor" value="-100" min="-120" max="-70" step="1"> </div>
-    <div class="input-group"> <label for="obstacleDensity">Obstacle Density (per 100 cells):</label> <input type="number" id="obstacleDensity" value="5" min="0" max="20" step="0.1"> </div>
-    <div class="input-group"> <label>Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
-    <button class="action-button" onclick="clearAll()">Clear All Obstacles</button> 
-    <button class="action-button" onclick="randomObstacles()">Generate Layout from Density</button>
-  </div>
+ <div id="inputs-panel">
+<h3>System Parameters</h3>
+<div class="input-group">
+ <label for="obstacleMethod">Obstacle Placement:</label>
+ <select id="obstacleMethod" onchange="toggleObstacleInputs()">
+<option value="manual">Manual</option>
+<option value="generate">Generate Layout</option>
+ </select>
+</div>
+<div class="input-group"> <label for="setting">Environment Type:</label> <select id="setting"> <option value="urban">Urban (High Interference)</option> <option value="suburban">Suburban (Medium)</option> <option value="rural">Rural (Low Interference)</option> </select> </div>
+<div class="input-group"> <label for="Pt">Transmitter Power (dBm):</label> <input type="number" id="Pt" value="30" min="0" max="50" step="1"> </div>
+<div class="input-group"> <label for="Pmin">Min Required Power (dBm):</label> <input type="number" id="Pmin" value="-85" min="-120" max="-50" step="1"> </div>
+<div class="input-group"> <label for="frequency">Frequency (MHz):</label> <input type="number" id="frequency" value="900" min="400" max="6000" step="50"> </div>
+<div class="input-group"> <label for="noiseFloor">Noise Floor (dBm):</label> <input type="number" id="noiseFloor" value="-100" min="-120" max="-70" step="1"> </div>
+<div id="manual-inputs">
+ <div class="input-group"> <label>Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
+ <button class="action-button" onclick="clearAll()">Clear All Obstacles</button>
+</div>
+<div id="generate-inputs" style="display: none;">
+ <div class="input-group"> <label for="obstacleDensity">Obstacle Density (per 100 cells):</label> <input type="number" id="obstacleDensity" value="5" min="0" max="20" step="0.1"> </div>
+ <button class="action-button" onclick="randomObstacles()">Generate Layout from Density</button>
+</div>
+ </div>
 
-  <div id="outputs-panel">
-    <h3>Results & Analysis</h3>
-    <div class="output-section">
-      <h4>Coverage Metrics</h4>
-      <div class="metric"> <span class="metric-label">Outage Probability:</span> <span class="metric-value" id="outageProb">0.00%</span> </div>
-      <div class="progress-bar"> <div class="progress-fill" id="outageProgress" style="width: 0%;"></div> </div>
-      <div class="metric"> <span class="metric-label">Coverage Area:</span> <span class="metric-value" id="coverageArea">100.00%</span> </div>
-      <div class="metric"> <span class="metric-label">Cells in Outage:</span> <span class="metric-value" id="outageCells">0 / 960</span> </div>
-    </div>
-    <div class="output-section">
-      <h4>Signal Analysis</h4>
-      <div class="metric"> <span class="metric-label">Avg Rx Power (Covered):</span> <span class="metric-value" id="avgReceivedPower">0.00 dBm</span> </div>
-      <div class="metric"> <span class="metric-label">Min Rx Power (Covered):</span> <span class="metric-value" id="minReceivedPower">0.00 dBm</span> </div>
-      <div class="metric"> <span class="metric-label">Max Rx Power (Covered):</span> <span class="metric-value" id="maxReceivedPower">0.00 dBm</span> </div>
-      <div class="metric"> <span class="metric-label">Signal Dynamic Range:</span> <span class="metric-value" id="signalRange">0.00 dB</span> </div>
-    </div>
-    <div class="output-section">
-      <h4>Path Loss Analysis</h4>
-      <div class="metric"> <span class="metric-label">Avg Total Path Loss:</span> <span class="metric-value" id="avgPathloss">0.00 dB</span> </div>
-      <div class="metric"> <span class="metric-label">Avg Obstacle Shadow (dB):</span> <span class="metric-value" id="avgShadowLoss">0.00 dB</span> </div>
-      <div class="metric"> <span class="metric-label">Max Coverage Distance:</span> <span class="metric-value" id="maxDistance">0.00 km</span> </div>
-    </div>
-    <div class="output-section">
-      <h4>Environment Impact</h4>
-      <div class="metric"> <span class="metric-label">Environment Factor:</span> <span class="metric-value" id="envFactor">Urban</span> </div>
-      <div class="metric"> <span class="metric-label">Obstacle Count:</span> <span class="metric-value" id="obstacleCount">0</span> </div>
-      <div class="metric"> <span class="metric-label">Shadowing Model:</span> <span class="metric-value" id="shadowingFactor">Obstacle-based</span> </div>
-    </div>
-    <div class="status-indicator" id="systemStatus"> System Status: Excellent Coverage </div>
-  </div>
+ <div id="outputs-panel">
+<h3>Results & Analysis</h3>
+<div class="output-section">
+ <h4>Coverage Metrics</h4>
+ <div class="metric"> <span class="metric-label">Outage Probability:</span> <span class="metric-value" id="outageProb">0.00%</span> </div>
+ <div class="progress-bar"> <div class="progress-fill" id="outageProgress" style="width: 0%;"></div> </div>
+ <div class="metric"> <span class="metric-label">Coverage Area:</span> <span class="metric-value" id="coverageArea">100.00%</span> </div>
+ <div class="metric"> <span class="metric-label">Cells in Outage:</span> <span class="metric-value" id="outageCells">0 / 960</span> </div>
+</div>
+<div class="output-section">
+ <h4>Signal Analysis</h4>
+ <div class="metric"> <span class="metric-label">Avg Rx Power (Covered):</span> <span class="metric-value" id="avgReceivedPower">0.00 dBm</span> </div>
+ <div class="metric"> <span class="metric-label">Min Rx Power (Covered):</span> <span class="metric-value" id="minReceivedPower">0.00 dBm</span> </div>
+ <div class="metric"> <span class="metric-label">Max Rx Power (Covered):</span> <span class="metric-value" id="maxReceivedPower">0.00 dBm</span> </div>
+ <div class="metric"> <span class="metric-label">Signal Dynamic Range:</span> <span class="metric-value" id="signalRange">0.00 dB</span> </div>
+</div>
+<div class="output-section">
+ <h4>Path Loss Analysis</h4>
+ <div class="metric"> <span class="metric-label">Avg Total Path Loss:</span> <span class="metric-value" id="avgPathloss">0.00 dB</span> </div>
+ <div class="metric"> <span class="metric-label">Avg Obstacle Shadow (dB):</span> <span class="metric-value" id="avgShadowLoss">0.00 dB</span> </div>
+ <div class="metric"> <span class="metric-label">Max Coverage Distance:</span> <span class="metric-value" id="maxDistance">0.00 km</span> </div>
+</div>
+<div class="output-section">
+ <h4>Environment Impact</h4>
+ <div class="metric"> <span class="metric-label">Environment Factor:</span> <span class="metric-value" id="envFactor">Urban</span> </div>
+ <div class="metric"> <span class="metric-label">Obstacle Count:</span> <span class="metric-value" id="obstacleCount">0</span> </div>
+ <div class="metric"> <span class="metric-label">Shadowing Model:</span> <span class="metric-value" id="shadowingFactor">Obstacle-based</span> </div>
+</div>
+<div class="status-indicator" id="systemStatus"> System Status: Excellent Coverage </div>
+ </div>
 
-  <div id="chart-stats-panel">
-    <h3>Chart Statistics</h3>
-    <div class="output-section">
-        <div class="metric"> <span class="metric-label">Data Points:</span> <span class="metric-value" id="chartDataPoints">0</span> </div>
-        <div class="metric"> <span class="metric-label">Correlation (R²):</span> <span class="metric-value" id="chartCorrelation">N/A</span> </div>
-        <div class="metric"> <span class="metric-label">Trend:</span> <span class="metric-value" id="chartTrend">N/A</span> </div>
-    </div>
-  </div>
+ <div id="chart-stats-panel">
+<h3>Chart Statistics</h3>
+<div class="output-section">
+<div class="metric"> <span class="metric-label">Data Points:</span> <span class="metric-value" id="chartDataPoints">0</span> </div>
+<div class="metric"> <span class="metric-label">Correlation (R²):</span> <span class="metric-value" id="chartCorrelation">N/A</span> </div>
+<div class="metric"> <span class="metric-label">Trend:</span> <span class="metric-value" id="chartTrend">N/A</span> </div>
+</div>
+ </div>
 </div>
 
-  <!-- Make sure the script is loaded at the end of the body -->
-  <script src="./js/main.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/virtual-labs/virtual-style@0.0.8-b/js/script.js"></script>
-  
-  <!-- Add script to handle showing/hiding instructions -->
-  <script>
-    function toggleInstructions(tabName) {
-      const instructionsPanel = document.querySelector(`#${tabName}-page .instructions-panel`);
-      const showButton = document.querySelector(`#${tabName}-page .show-instructions-btn`);
-      
-      if (instructionsPanel.classList.contains('hidden')) {
-        // Show instructions
-        instructionsPanel.classList.remove('hidden');
-        showButton.style.display = 'none'; // Hide the "Show Instructions" button
-      } else {
-        // Hide instructions
-        instructionsPanel.classList.add('hidden');
-        showButton.style.display = 'block'; // Show the "Show Instructions" button
-      }
-    }
-  </script>
+<script src="./js/main.js"></script>
+ <script src="https://cdn.jsdelivr.net/gh/virtual-labs/virtual-style@0.0.8-b/js/script.js"></script>
+ 
+<script>
+function toggleInstructions(tabName) {
+ const instructionsPanel = document.querySelector(`#${tabName}-page .instructions-panel`);
+ const showButton = document.querySelector(`#${tabName}-page .show-instructions-btn`);
+ 
+ if (instructionsPanel.classList.contains('hidden')) {
+// Show instructions
+instructionsPanel.classList.remove('hidden');
+showButton.style.display = 'none'; // Hide the "Show Instructions" button
+ } else {
+// Hide instructions
+instructionsPanel.classList.add('hidden');
+showButton.style.display = 'block'; // Show the "Show Instructions" button
+ }
+}
+ </script>
 </body>
 </html>
