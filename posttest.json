@@ -1,0 +1,141 @@
+{
+  "version": 2.0,
+  "questions": [
+    {
+      "question": "If the target minimum received power is -80 dBm, and the received power at a distance d is -75 dBm, what is the outage probability at this distance?",
+      "answers": {
+        "a": "1",
+        "b": "0 (no outage)",
+        "c": "0.75",
+        "d": "1.25"
+      },
+      "explanations": {
+        "a": "Incorrect – outage probability cannot be 1 if signal is above threshold.",
+        "b": "Correct – received power (-75 dBm) is above -80 dBm threshold, so no outage occurs.",
+        "c": "Incorrect – 0.75 is not applicable in this case.",
+        "d": "Incorrect – outage probability cannot exceed 1."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "A receiver at distance d = 1 km experiences a pathloss of 80 dB. If the transmitter power is 35 dBm and the target minimum power is -45 dBm, does this receiver experience an outage?",
+      "answers": {
+        "a": "Yes",
+        "b": "No",
+        "c": "May be",
+        "d": "Insufficient information"
+      },
+      "explanations": {
+        "a": "Correct – received power is 35 - 80 = -45 dBm, exactly at the threshold, so it is considered outage in strict threshold definitions.",
+        "b": "Incorrect – the signal is at the limit, meaning marginal coverage or outage.",
+        "c": "Incorrect – this can be determined with given values.",
+        "d": "Incorrect – all needed parameters are provided."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "If the coverage radius of a base station is increased while keeping transmit power constant, what is likely to happen to the outage probability?",
+      "answers": {
+        "a": "It will increase",
+        "b": "It will decrease",
+        "c": "It will remain the same",
+        "d": "It will drop to zero"
+      },
+      "explanations": {
+        "a": "Correct – larger coverage radius means more users at edge with weak signal, increasing outage.",
+        "b": "Incorrect – this happens only with more transmit power or better antennas.",
+        "c": "Incorrect – pathloss changes with distance, so outage changes too.",
+        "d": "Incorrect – zero outage is unrealistic."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "A cell has an outage probability of 0.1. Which statement is correct?",
+      "answers": {
+        "a": "10% of locations in the cell have unacceptable signal levels",
+        "b": "The cell has 10 transmitters",
+        "c": "Only 10 users can connect at a time",
+        "d": "90% of locations have no coverage"
+      },
+      "explanations": {
+        "a": "Correct – outage probability 0.1 means 10% of locations fall below threshold.",
+        "b": "Incorrect – outage probability says nothing about transmitter count.",
+        "c": "Incorrect – this relates to capacity, not outage probability.",
+        "d": "Incorrect – 90% have coverage, not zero coverage."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "Which technique can help improve coverage without increasing transmit power?",
+      "answers": {
+        "a": "Using higher gain antennas",
+        "b": "Reducing antenna height",
+        "c": "Increasing frequency",
+        "d": "Increasing receiver noise figure"
+      },
+      "explanations": {
+        "a": "Correct – higher gain antennas focus energy and improve received power.",
+        "b": "Incorrect – reducing height usually reduces coverage.",
+        "c": "Incorrect – higher frequency increases pathloss.",
+        "d": "Incorrect – higher noise figure reduces performance."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "If the received SNR is below the target SNR threshold, this results in:",
+      "answers": {
+        "a": "Coverage expansion",
+        "b": "Outage",
+        "c": "Better signal quality",
+        "d": "Lower pathloss"
+      },
+      "explanations": {
+        "a": "Incorrect – low SNR does not expand coverage.",
+        "b": "Correct – if SNR < threshold, the link is considered in outage.",
+        "c": "Incorrect – low SNR means worse quality.",
+        "d": "Incorrect – SNR is not the same as pathloss."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "In a Rayleigh fading channel, outage probability is typically:",
+      "answers": {
+        "a": "Higher compared to free-space conditions",
+        "b": "Lower compared to free-space conditions",
+        "c": "Always zero",
+        "d": "Independent of fading"
+      },
+      "explanations": {
+        "a": "Correct – multipath fading causes deeper fades, increasing outage probability.",
+        "b": "Incorrect – fading worsens outage probability.",
+        "c": "Incorrect – fading always causes some probability of outage.",
+        "d": "Incorrect – fading is directly related to outage."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "Which environment would likely require the smallest cell radius to maintain low outage probability?",
+      "answers": {
+        "a": "Dense urban",
+        "b": "Rural open field",
+        "c": "Suburban",
+        "d": "Over-water"
+      },
+      "explanations": {
+        "a": "Correct – buildings and obstructions cause high pathloss, requiring smaller cells.",
+        "b": "Incorrect – rural areas can have large coverage due to fewer obstructions.",
+        "c": "Incorrect – suburban has moderate coverage needs.",
+        "d": "Incorrect – over-water paths generally have low pathloss."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    }
+  ]
+}
