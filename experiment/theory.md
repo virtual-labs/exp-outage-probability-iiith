@@ -13,15 +13,23 @@ $$
 \end{aligned}
 $$
 
-Considering the log normal distance for shadowing, we have
+Recall from experiment 1 that the recieved power at a distance $d$ is given as
 
 $$
 \begin{aligned}
-    P_{out}\left(d,P_{min}\right) = 1 - Q\left(\frac{P_{min}-PL}{\sigma_{\psi_{dB}}}\right)
+    P_r(d) = P_t + 10\log_{10}K - 10\gamma \log_{10} \frac{d}{d_0} - \psi_{dB}
 \end{aligned}
 $$
 
-where PL is the total pathloss that accounts for both linear pathloss and shadowing and $\sigma_{\psi_{dB}}$ is the standard deviation of the shadowing in dB. Q(.) is the Gaussian tail function, giving the probability that a normally distributed variable exceeds a certain value.
+Using this, we can now write the outage probability as
+
+$$
+\begin{aligned}
+    P_{out}\left(d,P_{min}\right) = 1 - Q\left(\frac{P_{min}-P_r(d)}{\sigma_{\psi_{dB}}}\right)
+\end{aligned}
+$$
+
+where $\sigma_{\psi_{dB}}$ is the standard deviation of the shadowing in dB (ranging from 4 to 13dB) and Q(.) is the Gaussian tail function.
 
 The above equation allows to predict how often users in different locations may experience poor connectivity. A high outage probability means that many users will experience dropped calls or low data rates.
 
@@ -34,6 +42,12 @@ $$
 \end{aligned}
 $$
 
-By studying outage probability and coverage together, we can design networks that balance coverage, capacity, and reliability, ensuring that users experience consistent connectivity even in challenging environments.
+The cell coverage can be expressed as
+
+$$
+\begin{aligned}
+    C = P\left(P_r(d) \geq P_{min}\right) = 1 -  P_{out}\left(d,P_{min}\right) = Q\left(\frac{P_{min}-P_r(d)}{\sigma_{\psi_{dB}}}\right)
+\end{aligned}
+$$
 
 In this experiment, we will investigate outage probability to understand its implications on wireless system design. By examining the conditions under which outage occurs, we can identify strategies to enhance coverage and reliability. This analysis will provide valuable insights into optimizing wireless networks to minimize outage probability and ensure consistent performance.
