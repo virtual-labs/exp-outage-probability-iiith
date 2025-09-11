@@ -630,7 +630,9 @@ function updateChart() {
   const dataPoints = [];
   let idealPoints = [];
 
-  if (chartType === 'pout-snr') {
+  // Replace the 'pout-snr' case in your updateChart() function with this corrected version:
+
+if (chartType === 'pout-snr') {
   const allSimulatedCells = [];
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
     const cell = cells[r][c];
@@ -638,13 +640,36 @@ function updateChart() {
     allSimulatedCells.push(cell);
   }
   const totalSimulatedCells = allSimulatedCells.length;
+  
+  // Get obstacles data for shadow calculations
+  const obstaclesData = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    if (cells[r][c].obstacleType) {
+      obstaclesData.push({ x: c, y: r, type: cells[r][c].obstacleType });
+    }
+  }
+  
   for (let snrThreshold = -10; snrThreshold <= 40; snrThreshold += 1) {
     let outageCount = 0;
     if (totalSimulatedCells > 0) {
       for (const cell of allSimulatedCells) {
-        // Use randomized received power (same as other plots)
-        const receivedPowerWithFading = Pt - cell.pathlossWithFading;
+        // Calculate fresh random fading for this iteration
+        const row = parseInt(cell.element.dataset.row);
+        const col = parseInt(cell.element.dataset.col);
+        const shadowProps = getEffectiveShadowProperties(row, col, obstaclesData);
+        
+        // Generate fresh random fading
+        let fadingLoss = 0;
+        if (shadowProps.affectingObstacleCount > 0) {
+          const totalStdDev = Math.sqrt(shadowProps.affectingObstacleCount) * FADING_STD_DEV_PER_OBSTACLE;
+          fadingLoss = gaussianRandom(totalStdDev);
+        }
+        
+        // Calculate received power with fresh fading
+        const pathlossWithNewFading = cell.currentPathloss + fadingLoss;
+        const receivedPowerWithFading = Pt - pathlossWithNewFading;
         const cellSnr = receivedPowerWithFading - noiseFloor;
+        
         if (cellSnr < snrThreshold) { outageCount++; }
       }
       const pOutage = outageCount / totalSimulatedCells;
