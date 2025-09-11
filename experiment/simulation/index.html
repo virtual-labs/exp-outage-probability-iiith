@@ -83,7 +83,6 @@
  </div>
  <div class="chart-container"> <canvas id="analysisChart"></canvas> </div>
  </div>
- <div id="analysis-outputs-column" class="column"></div>
  </div>
 </div>
 
@@ -102,13 +101,16 @@
 <div class="input-group"> <label for="Pmin">Min Required Power (dBm):</label> <input type="number" id="Pmin" value="-85" min="-120" max="-50" step="1"> </div>
 <div class="input-group"> <label for="frequency">Frequency (MHz):</label> <input type="number" id="frequency" value="900" min="400" max="6000" step="50"> </div>
 <div class="input-group"> <label for="noiseFloor">Noise Floor (dBm):</label> <input type="number" id="noiseFloor" value="-100" min="-120" max="-70" step="1"> </div>
+<!-- Add the plot controls here -->
+<div class="plot-controls" style="display: none;">
+  <button class="action-button" onclick="updateChart()">Generate Plot</button>
+</div>
 <div id="manual-inputs">
  <div class="input-group"> <label>Click Mode:</label> <div class="mode-buttons"> <button class="mode-btn active" onclick="setMode('normal')">Normal</button> <button class="mode-btn" onclick="setMode('heavy')">Heavy</button> <button class="mode-btn" onclick="setMode('erase')">Erase</button> </div> </div>
  <button class="action-button" onclick="clearAll()">Clear All Obstacles</button>
 </div>
 <div id="generate-inputs" style="display: none;">
- <div class="input-group"> <label for="obstacleDensity">Obstacle Density (per 100 cells):</label> <input type="number" id="obstacleDensity" value="5" min="0" max="20" step="0.1"> </div>
- <button class="action-button" onclick="randomObstacles()">Generate Layout from Density</button>
+  <button class="action-button" onclick="randomObstacles()">Generate Random Layout</button>
 </div>
  </div>
 
@@ -119,7 +121,7 @@
  <div class="metric"> <span class="metric-label">Outage Probability:</span> <span class="metric-value" id="outageProb">0.00%</span> </div>
  <div class="progress-bar"> <div class="progress-fill" id="outageProgress" style="width: 0%;"></div> </div>
  <div class="metric"> <span class="metric-label">Coverage Area:</span> <span class="metric-value" id="coverageArea">100.00%</span> </div>
- <div class="metric"> <span class="metric-label">Cells in Outage:</span> <span class="metric-value" id="outageCells">0 / 960</span> </div>
+ <!-- <div class="metric"> <span class="metric-label">Cells in Outage:</span> <span class="metric-value" id="outageCells">0 / 960</span> </div> -->
 </div>
 <div class="output-section">
  <h4>Signal Analysis</h4>

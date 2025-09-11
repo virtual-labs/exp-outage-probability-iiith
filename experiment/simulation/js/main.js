@@ -51,29 +51,33 @@ function adjustGridForMobile() {
 }
 
 function switchMainTask(taskName) {
-  document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
-  document.querySelectorAll('.main-task-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+  document.querySelectorAll('.main-task-btn').forEach(btn => btn.classList.remove('active'));
 
-  panelHolder.appendChild(inputsPanel);
-  panelHolder.appendChild(outputsPanel);
-  panelHolder.appendChild(chartStatsPanel);
+  panelHolder.appendChild(inputsPanel);
+  panelHolder.appendChild(outputsPanel);
+  // Remove chartStatsPanel line
 
-  document.getElementById(taskName + '-page').classList.add('active');
-  document.getElementById(taskName + '-task-btn').classList.add('active');
+  document.getElementById(taskName + '-page').classList.add('active');
+  document.getElementById(taskName + '-task-btn').classList.add('active');
 
-  if (taskName === 'simulation') {
-    simInputsContainer.appendChild(inputsPanel);
-    simOutputsContainer.appendChild(outputsPanel);
-  } else { // 'analysis'
-    analysisInputsContainer.appendChild(inputsPanel);
-    analysisOutputsContainer.appendChild(chartStatsPanel);
-    setTimeout(() => {
-        if(analysisChart) analysisChart.resize();
-        updateChart();
-    }, 10);
-  }
+  if (taskName === 'simulation') {
+    simInputsContainer.appendChild(inputsPanel);
+    simOutputsContainer.appendChild(outputsPanel);
+    // Hide plot controls
+    const plotControls = document.querySelector('.plot-controls');
+    if (plotControls) plotControls.style.display = 'none';
+  } else { // 'analysis'
+    analysisInputsContainer.appendChild(inputsPanel);
+    // Don't append chartStatsPanel since it no longer exists
+    // Show plot controls
+    const plotControls = document.querySelector('.plot-controls');
+    if (plotControls) plotControls.style.display = 'block';
+    setTimeout(() => {
+        if(analysisChart) analysisChart.resize();
+    }, 10);
+  }
 }
-
 
 const originalUpdatePathlossAndMetrics = updatePathlossAndMetrics;
 updatePathlossAndMetrics = function() {
@@ -462,7 +466,7 @@ function updateMetricDisplays(metrics) {
   document.getElementById('outageProb').textContent = `${metrics.outageProb.toFixed(2)}%`;
   document.getElementById('outageProgress').style.width = `${metrics.outageProb.toFixed(2)}%`;
   document.getElementById('coverageArea').textContent = `${metrics.coverageArea.toFixed(2)}%`;
-  document.getElementById('outageCells').textContent = `${metrics.outageCells} / ${metrics.totalSimulatedCells}`; 
+//   document.getElementById('outageCells').textContent = `${metrics.outageCells} / ${metrics.totalSimulatedCells}`; 
   document.getElementById('avgReceivedPower').textContent = `${isNaN(metrics.avgReceivedPower) ? 'N/A' : metrics.avgReceivedPower.toFixed(2)} dBm`;
   document.getElementById('minReceivedPower').textContent = `${isNaN(metrics.minRxPower) ? 'N/A' : metrics.minRxPower.toFixed(2)} dBm`;
   document.getElementById('maxReceivedPower').textContent = `${isNaN(metrics.maxRxPower) ? 'N/A' : metrics.maxRxPower.toFixed(2)} dBm`;
@@ -517,7 +521,7 @@ function showTooltip(event, row, col) {
         else { content += `Status: <span style="color: #69f0ae; font-weight: bold;">Covered</span>`; }
         if(cell.isVisuallyShadowed && cell.lateralScaleForTinge > 0.001) {
             const alpha = cell.element.style.getPropertyValue('--shadow-alpha');
-            content += `<br><i>(In shadow, Tinge Alpha: ${alpha ? parseFloat(alpha).toFixed(3) : 'N/A'})</i>`;
+            content += `<br><i>(In shadow)</i>`;
         }
     }
     tooltip.innerHTML = content;
@@ -558,22 +562,33 @@ function generatePoisson(mean) {
 }
 
 function randomObstacles() {
-  clearAll(); 
-  const densityPer100 = parseFloat(document.getElementById('obstacleDensity').value);
-  const gridArea = rows * cols;
-  const meanObstacles = (densityPer100 / 100) * gridArea;
-  const numObstaclesToPlace = generatePoisson(meanObstacles);
-  const maxPlaceable = gridArea - 1; 
-  const numObstacles = Math.min(numObstaclesToPlace, maxPlaceable);
-  for (let i = 0; i < numObstacles; i++) {
-    let r, c;
-    do { r = Math.floor(Math.random()*rows); c = Math.floor(Math.random()*cols); }
-    while ((r === transmitter.y && c === transmitter.x) || cells[r][c].obstacleType);
-    const type = Math.random() < 0.7 ? 'normal' : 'heavy'; 
-    cells[r][c].obstacleType = type;
-    cells[r][c].element.classList.add(type === 'normal' ? 'obstacle-normal' : 'obstacle-heavy');
-  }
-  updatePathlossAndMetrics();
+  clearAll();
+  const environment = document.getElementById('setting').value;
+  
+  // Environment-specific Poisson means (scaled for grid size)
+  const environmentMeans = {
+    rural: 20,     // Least obstacles
+    suburban: 50,  // Medium obstacles  
+    urban: 80      // Most obstacles
+  };
+  
+  const meanObstacles = environmentMeans[environment];
+  const numObstaclesToPlace = generatePoisson(meanObstacles);
+  const maxPlaceable = (rows * cols) - 1; // Excluding transmitter cell
+  const numObstacles = Math.min(numObstaclesToPlace, maxPlaceable);
+  
+  for (let i = 0; i < numObstacles; i++) {
+    let r, c;
+    do { 
+      r = Math.floor(Math.random() * rows); 
+      c = Math.floor(Math.random() * cols); 
+    } while ((r === transmitter.y && c === transmitter.x) || cells[r][c].obstacleType);
+    
+    const type = Math.random() < 0.7 ? 'normal' : 'heavy';
+    cells[r][c].obstacleType = type;
+    cells[r][c].element.classList.add(type === 'normal' ? 'obstacle-normal' : 'obstacle-heavy');
+  }
+  updatePathlossAndMetrics();
 }
 
 function setupInputListeners() {
@@ -606,102 +621,173 @@ function initializeChart() {
 
 // MODIFICATION: This function now uses the randomized 'pathlossWithFading' for relevant plots.
 function updateChart() {
-  if (!analysisChart) { initializeChart(); if (!analysisChart) return; }
-  
-  const chartType = document.getElementById('chartType').value;
-  const noiseFloor = parseFloat(document.getElementById('noiseFloor').value);
-  const Pt = parseFloat(document.getElementById('Pt').value);
-  const dataPoints = [];
+  if (!analysisChart) { initializeChart(); if (!analysisChart) return; }
+ 
+  const chartType = document.getElementById('chartType').value;
+  const noiseFloor = parseFloat(document.getElementById('noiseFloor').value);
+  const Pt = parseFloat(document.getElementById('Pt').value);
+  const frequency = parseFloat(document.getElementById('frequency').value);
+  const dataPoints = [];
+  let idealPoints = [];
 
-  if (chartType === 'pout-snr') {
-    const allSimulatedCells = [];
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      const cell = cells[r][c];
-      if ((r === transmitter.y && c === transmitter.x) || cell.obstacleType) continue;
-      allSimulatedCells.push(cell);
-    }
-    const totalSimulatedCells = allSimulatedCells.length;
-    for (let snrThreshold = -10; snrThreshold <= 40; snrThreshold += 1) {
-      let outageCount = 0;
-      if (totalSimulatedCells > 0) {
-        for (const cell of allSimulatedCells) {
-          // This plot also uses the deterministic value to remain consistent with the lab's goal
-          const cellSnr = cell.receivedPower - noiseFloor;
-          if (cellSnr < snrThreshold) { outageCount++; }
-        }
-        const pOutage = outageCount / totalSimulatedCells;
-        dataPoints.push({ x: snrThreshold, y: pOutage });
-      }
-    }
-  } else {
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const cell = cells[r][c];
-        if ((r === transmitter.y && c === transmitter.x) || cell.obstacleType) continue;
-        
-        const distanceKm = cell.distance / 1000;
-        let yValue;
-        
-        // --- PLOT-SPECIFIC DATA SELECTION ---
-        switch (chartType) {
-          case 'snr-distance':
-            // Use randomized pathloss to calculate a randomized received power for the plot
-            const receivedPowerWithFading_snr = Pt - cell.pathlossWithFading;
-            yValue = receivedPowerWithFading_snr - noiseFloor;
-            break;
-          case 'power-distance':
-            // Use randomized pathloss to calculate a randomized received power for the plot
-            const receivedPowerWithFading_pow = Pt - cell.pathlossWithFading;
-            yValue = receivedPowerWithFading_pow;
-            break;
-          case 'pathloss-distance':
-            // Use the stored randomized pathloss directly
-            yValue = cell.pathlossWithFading;
-            break;
-          case 'outage-distance':
-            // Outage plot uses the deterministic value from the grid
-            yValue = cell.isOutage ? 1 : 0;
-            break;
-          default:
-            yValue = cell.receivedPower; // Default to deterministic power
-        }
-        dataPoints.push({ x: distanceKm, y: yValue });
-      }
-    }
-    dataPoints.sort((a, b) => a.x - b.x);
-  }
-  
-  analysisChart.data.datasets[0].data = dataPoints;
-  
-  const chartLabels = {
-    'snr-distance':      { title: 'SNR vs Distance (with Fading)', yLabel: 'SNR (dB)', xLabel: 'Distance (km)', color: 'rgba(40, 167, 69, 0.7)' },
-    'power-distance':    { title: 'Received Power vs Distance (with Fading)', yLabel: 'Received Power (dBm)', xLabel: 'Distance (km)', color: 'rgba(0, 123, 255, 0.7)' },
-    'pathloss-distance': { title: 'Path Loss vs Distance (with Fading)', yLabel: 'Path Loss (dB)', xLabel: 'Distance (km)', color: 'rgba(220, 53, 69, 0.7)' },
-    'outage-distance':   { title: 'Outage vs Distance (Deterministic)', yLabel: 'Outage (1=Yes, 0=No)', xLabel: 'Distance (km)', color: 'rgba(111, 66, 193, 0.7)' },
-    'pout-snr':          { title: 'Outage Probability vs SNR', yLabel: 'Outage Probability', xLabel: 'SNR Threshold (dB)', color: 'rgba(253, 126, 20, 0.7)'}
-  };
-  
-  const currentLabel = chartLabels[chartType];
-  analysisChart.data.datasets[0].label = currentLabel.title;
-  analysisChart.data.datasets[0].backgroundColor = currentLabel.color;
-  analysisChart.data.datasets[0].borderColor = currentLabel.color.replace('0.7', '1');
-  analysisChart.options.scales.x.title.text = currentLabel.xLabel;
-  analysisChart.options.scales.y.title.text = currentLabel.yLabel;
-  document.getElementById('chartDataPoints').textContent = dataPoints.length;
-  
-  if (chartType === 'pout-snr') {
-    analysisChart.config.type = 'line'; analysisChart.data.datasets[0].pointRadius = 2; analysisChart.data.datasets[0].showLine = true; analysisChart.data.datasets[0].fill = true;
-    document.getElementById('chartCorrelation').textContent = 'N/A'; document.getElementById('chartTrend').textContent = 'Increasing';
-    analysisChart.options.plugins.tooltip.callbacks.label = function(context) { return `P(outage) @ ${context.parsed.x} dB: ${context.parsed.y.toFixed(3)}`; };
-  } else {
-    analysisChart.config.type = 'scatter'; analysisChart.data.datasets[0].pointRadius = 5; analysisChart.data.datasets[0].showLine = false; analysisChart.data.datasets[0].fill = false;
-    const correlation = calculateCorrelation(dataPoints);
-    const trend = dataPoints.length > 1 ? (dataPoints[dataPoints.length - 1].y > dataPoints[0].y ? 'Increasing' : 'Decreasing') : 'N/A';
-    document.getElementById('chartCorrelation').textContent = isNaN(correlation) ? 'N/A' : correlation.toFixed(3);
-    document.getElementById('chartTrend').textContent = trend;
-    analysisChart.options.plugins.tooltip.callbacks.label = function(context) { return `(${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`; };
-  }
-  analysisChart.update('none');
+  // Replace the 'pout-snr' case in your updateChart() function with this corrected version:
+
+if (chartType === 'pout-snr') {
+  const allSimulatedCells = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const cell = cells[r][c];
+    if ((r === transmitter.y && c === transmitter.x) || cell.obstacleType) continue;
+    allSimulatedCells.push(cell);
+  }
+  const totalSimulatedCells = allSimulatedCells.length;
+  
+  // Get obstacles data for shadow calculations
+  const obstaclesData = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    if (cells[r][c].obstacleType) {
+      obstaclesData.push({ x: c, y: r, type: cells[r][c].obstacleType });
+    }
+  }
+  
+  for (let snrThreshold = -10; snrThreshold <= 40; snrThreshold += 1) {
+    let outageCount = 0;
+    if (totalSimulatedCells > 0) {
+      for (const cell of allSimulatedCells) {
+        // Calculate fresh random fading for this iteration
+        const row = parseInt(cell.element.dataset.row);
+        const col = parseInt(cell.element.dataset.col);
+        const shadowProps = getEffectiveShadowProperties(row, col, obstaclesData);
+        
+        // Generate fresh random fading
+        let fadingLoss = 0;
+        if (shadowProps.affectingObstacleCount > 0) {
+          const totalStdDev = Math.sqrt(shadowProps.affectingObstacleCount) * FADING_STD_DEV_PER_OBSTACLE;
+          fadingLoss = gaussianRandom(totalStdDev);
+        }
+        
+        // Calculate received power with fresh fading
+        const pathlossWithNewFading = cell.currentPathloss + fadingLoss;
+        const receivedPowerWithFading = Pt - pathlossWithNewFading;
+        const cellSnr = receivedPowerWithFading - noiseFloor;
+        
+        if (cellSnr < snrThreshold) { outageCount++; }
+      }
+      const pOutage = outageCount / totalSimulatedCells;
+      dataPoints.push({ x: snrThreshold, y: pOutage });
+    }
+  }
+} else {
+    // Generate data points and ideal case
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const cell = cells[r][c];
+        if ((r === transmitter.y && c === transmitter.x) || cell.obstacleType) continue;
+       
+        const distanceKm = cell.distance / 1000;
+        let yValue, idealValue;
+       
+        switch (chartType) {
+          // Add this debugging code in your updateChart function to see what's happening:
+          case 'snr-distance':
+            const receivedPowerWithFading_snr = Pt - cell.pathlossWithFading;
+            yValue = receivedPowerWithFading_snr - noiseFloor;
+            
+            // Use the same base model as actual data (but without obstacles/fading)
+            const environmentVal = document.getElementById('setting').value;
+            const idealPathloss_snr = calculatePathLoss(cell.distance, frequency, environmentVal);
+            const idealPower_snr = Pt - idealPathloss_snr;
+            idealValue = idealPower_snr - noiseFloor;
+            break;
+          case 'power-distance':
+          const receivedPowerWithFading_pow = Pt - cell.pathlossWithFading;
+          yValue = receivedPowerWithFading_pow;
+          // Use the same base model as actual data (but without obstacles/fading)
+          const environmentVal_pow = document.getElementById('setting').value;
+          const idealPathloss_pow = calculatePathLoss(cell.distance, frequency, environmentVal_pow);
+          idealValue = Pt - idealPathloss_pow;
+          break;
+
+        case 'pathloss-distance':
+          yValue = cell.pathlossWithFading;
+          // Use the same base model as actual data (but without obstacles/fading)
+          const environmentVal_pl = document.getElementById('setting').value;
+          idealValue = calculatePathLoss(cell.distance, frequency, environmentVal_pl);
+          break;
+          case 'outage-distance':
+            yValue = cell.isOutage ? 1 : 0;
+            idealValue = null; // No ideal case for outage
+            break;
+          default:
+            yValue = cell.receivedPower;
+            idealValue = null;
+        }
+        dataPoints.push({ x: distanceKm, y: yValue });
+        if (idealValue !== null) {
+          idealPoints.push({ x: distanceKm, y: idealValue });
+        }
+      }
+    }
+    dataPoints.sort((a, b) => a.x - b.x);
+    idealPoints.sort((a, b) => a.x - b.x);
+  }
+
+  // Update chart datasets
+  analysisChart.data.datasets[0].data = dataPoints;
+  
+  // Add/update ideal case dataset for applicable charts
+  // Add/update ideal case dataset for applicable charts
+  if (idealPoints.length > 0) {
+    if (analysisChart.data.datasets.length === 1) {
+      analysisChart.data.datasets.push({
+        label: 'Ideal Case (Free Space)',
+        data: idealPoints,
+        backgroundColor: 'transparent', // No fill
+        borderColor: 'rgba(255, 0, 0, 1)',
+        borderWidth: 3,
+        pointRadius: 0,        // No points on the curve
+        showLine: true,        // Show the line
+        borderDash: [8, 4],    // Dotted line
+        fill: false
+      });
+    } else {
+      analysisChart.data.datasets[1].data = idealPoints;
+      analysisChart.data.datasets[1].pointRadius = 0; // Ensure no points
+    }
+  }
+ 
+  const chartLabels = {
+    'snr-distance':      { title: 'SNR vs Distance (with Fading)', yLabel: 'SNR (dB)', xLabel: 'Distance (km)', color: 'rgba(40, 167, 69, 0.7)' },
+    'power-distance':    { title: 'Received Power vs Distance (with Fading)', yLabel: 'Received Power (dBm)', xLabel: 'Distance (km)', color: 'rgba(0, 123, 255, 0.7)' },
+    'pathloss-distance': { title: 'Path Loss vs Distance (with Fading)', yLabel: 'Path Loss (dB)', xLabel: 'Distance (km)', color: 'rgba(220, 53, 69, 0.7)' },
+    'outage-distance':   { title: 'Outage vs Distance (Deterministic)', yLabel: 'Outage (1=Yes, 0=No)', xLabel: 'Distance (km)', color: 'rgba(111, 66, 193, 0.7)' },
+    'pout-snr':          { title: 'Outage Probability vs SNR', yLabel: 'Outage Probability', xLabel: 'SNR Threshold (dB)', color: 'rgba(253, 126, 20, 0.7)'}
+  };
+ 
+  const currentLabel = chartLabels[chartType];
+  analysisChart.data.datasets[0].label = currentLabel.title;
+  analysisChart.data.datasets[0].backgroundColor = currentLabel.color;
+  analysisChart.data.datasets[0].borderColor = currentLabel.color.replace('0.7', '1');
+  analysisChart.options.scales.x.title.text = currentLabel.xLabel;
+  analysisChart.options.scales.y.title.text = currentLabel.yLabel;
+
+  if (chartType === 'pout-snr') {
+    analysisChart.config.type = 'line'; 
+    analysisChart.data.datasets[0].pointRadius = 2; 
+    analysisChart.data.datasets[0].showLine = true; 
+    analysisChart.data.datasets[0].fill = true;
+    analysisChart.options.plugins.tooltip.callbacks.label = function(context) { 
+      return `P(outage) @ ${context.parsed.x} dB: ${context.parsed.y.toFixed(3)}`; 
+    };
+  } else {
+    analysisChart.config.type = 'scatter'; 
+    analysisChart.data.datasets[0].pointRadius = 5; 
+    analysisChart.data.datasets[0].showLine = false; 
+    analysisChart.data.datasets[0].fill = false;
+    analysisChart.options.plugins.tooltip.callbacks.label = function(context) { 
+      return `(${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`; 
+    };
+  }
+  analysisChart.update('none');
 }
 
 function calculateCorrelation(points) {
