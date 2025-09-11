@@ -85,6 +85,15 @@
       padding-bottom: 20px;
     }
 
+    /* Make analysis page use only 2 columns */
+    #analysis-page {
+    grid-template-columns: 1fr 2fr !important; /* Input column + Plot column */
+    }
+
+    #analysis-plot-column {
+    grid-column: 2; /* Make sure plot column takes the second position */
+    }
+
     #analysis-plot-column {
         display: flex;
         flex-direction: column;

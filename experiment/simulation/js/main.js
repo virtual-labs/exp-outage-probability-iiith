@@ -631,26 +631,27 @@ function updateChart() {
   let idealPoints = [];
 
   if (chartType === 'pout-snr') {
-    // Existing P(outage) vs SNR logic remains the same
-    const allSimulatedCells = [];
-    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-      const cell = cells[r][c];
-      if ((r === transmitter.y && c === transmitter.x) || cell.obstacleType) continue;
-      allSimulatedCells.push(cell);
-    }
-    const totalSimulatedCells = allSimulatedCells.length;
-    for (let snrThreshold = -10; snrThreshold <= 40; snrThreshold += 1) {
-      let outageCount = 0;
-      if (totalSimulatedCells > 0) {
-        for (const cell of allSimulatedCells) {
-          const cellSnr = cell.receivedPower - noiseFloor;
-          if (cellSnr < snrThreshold) { outageCount++; }
-        }
-        const pOutage = outageCount / totalSimulatedCells;
-        dataPoints.push({ x: snrThreshold, y: pOutage });
+  const allSimulatedCells = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const cell = cells[r][c];
+    if ((r === transmitter.y && c === transmitter.x) || cell.obstacleType) continue;
+    allSimulatedCells.push(cell);
+  }
+  const totalSimulatedCells = allSimulatedCells.length;
+  for (let snrThreshold = -10; snrThreshold <= 40; snrThreshold += 1) {
+    let outageCount = 0;
+    if (totalSimulatedCells > 0) {
+      for (const cell of allSimulatedCells) {
+        // Use randomized received power (same as other plots)
+        const receivedPowerWithFading = Pt - cell.pathlossWithFading;
+        const cellSnr = receivedPowerWithFading - noiseFloor;
+        if (cellSnr < snrThreshold) { outageCount++; }
       }
+      const pOutage = outageCount / totalSimulatedCells;
+      dataPoints.push({ x: snrThreshold, y: pOutage });
     }
-  } else {
+  }
+} else {
     // Generate data points and ideal case
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -661,26 +662,32 @@ function updateChart() {
         let yValue, idealValue;
        
         switch (chartType) {
+          // Add this debugging code in your updateChart function to see what's happening:
           case 'snr-distance':
             const receivedPowerWithFading_snr = Pt - cell.pathlossWithFading;
             yValue = receivedPowerWithFading_snr - noiseFloor;
-            // Ideal case: free space path loss only
-            const idealPathloss_snr = calculateFreeSpacePathLoss(cell.distance, frequency);
+            
+            // Use the same base model as actual data (but without obstacles/fading)
+            const environmentVal = document.getElementById('setting').value;
+            const idealPathloss_snr = calculatePathLoss(cell.distance, frequency, environmentVal);
             const idealPower_snr = Pt - idealPathloss_snr;
             idealValue = idealPower_snr - noiseFloor;
             break;
           case 'power-distance':
-            const receivedPowerWithFading_pow = Pt - cell.pathlossWithFading;
-            yValue = receivedPowerWithFading_pow;
-            // Ideal case: free space path loss only
-            const idealPathloss_pow = calculateFreeSpacePathLoss(cell.distance, frequency);
-            idealValue = Pt - idealPathloss_pow;
-            break;
-          case 'pathloss-distance':
-            yValue = cell.pathlossWithFading;
-            // Ideal case: free space path loss only
-            idealValue = calculateFreeSpacePathLoss(cell.distance, frequency);
-            break;
+          const receivedPowerWithFading_pow = Pt - cell.pathlossWithFading;
+          yValue = receivedPowerWithFading_pow;
+          // Use the same base model as actual data (but without obstacles/fading)
+          const environmentVal_pow = document.getElementById('setting').value;
+          const idealPathloss_pow = calculatePathLoss(cell.distance, frequency, environmentVal_pow);
+          idealValue = Pt - idealPathloss_pow;
+          break;
+
+        case 'pathloss-distance':
+          yValue = cell.pathlossWithFading;
+          // Use the same base model as actual data (but without obstacles/fading)
+          const environmentVal_pl = document.getElementById('setting').value;
+          idealValue = calculatePathLoss(cell.distance, frequency, environmentVal_pl);
+          break;
           case 'outage-distance':
             yValue = cell.isOutage ? 1 : 0;
             idealValue = null; // No ideal case for outage
@@ -703,26 +710,23 @@ function updateChart() {
   analysisChart.data.datasets[0].data = dataPoints;
   
   // Add/update ideal case dataset for applicable charts
+  // Add/update ideal case dataset for applicable charts
   if (idealPoints.length > 0) {
     if (analysisChart.data.datasets.length === 1) {
       analysisChart.data.datasets.push({
         label: 'Ideal Case (Free Space)',
         data: idealPoints,
-        backgroundColor: 'rgba(255,0,0,0.8)',
+        backgroundColor: 'transparent', // No fill
         borderColor: 'rgba(255, 0, 0, 1)',
-        borderWidth: 4,
-        pointRadius: 0,
-        showLine: true,
-        borderDash: [10, 5], // Dotted line
+        borderWidth: 3,
+        pointRadius: 0,        // No points on the curve
+        showLine: true,        // Show the line
+        borderDash: [8, 4],    // Dotted line
         fill: false
       });
     } else {
       analysisChart.data.datasets[1].data = idealPoints;
-    }
-  } else {
-    // Remove ideal case dataset if not applicable
-    if (analysisChart.data.datasets.length > 1) {
-      analysisChart.data.datasets.splice(1, 1);
+      analysisChart.data.datasets[1].pointRadius = 0; // Ensure no points
     }
   }
  
