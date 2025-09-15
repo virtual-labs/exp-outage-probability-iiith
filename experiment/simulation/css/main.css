@@ -85,15 +85,6 @@
       padding-bottom: 20px;
     }
 
-    /* Make analysis page use only 2 columns */
-    #analysis-page {
-    grid-template-columns: 1fr 2fr !important; /* Input column + Plot column */
-    }
-
-    #analysis-plot-column {
-    grid-column: 2; /* Make sure plot column takes the second position */
-    }
-
     #analysis-plot-column {
         display: flex;
         flex-direction: column;
@@ -366,7 +357,74 @@
     background-color: #138496;
 }
 
+/* Styling for the collapsible instructions */
+.v-collapsible-instruction-container {
+  grid-column: 1 / -1;
+  margin-top: 2%;
+  margin-bottom: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
 
+.v-collapsible {
+  cursor: pointer;
+  padding: 15px 20px;
+  font-weight: 600;
+  color: #17a2b8;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 8px 8px 0 0;
+  position: relative;
+}
+
+.v-collapsible::after {
+  content: '+';
+  position: absolute;
+  right: 20px;
+  font-size: 1.2em;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+.v-collapsible.active::after {
+  content: '−';
+}
+
+.v-content {
+  text-align: left;
+  padding: 0 10%;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.v-content.show {
+  padding: 20px 10%;
+  max-height: 1000px;
+}
+
+.v-content h3 {
+  margin: 0;
+  text-align: left;
+  font-weight: normal;
+}
+
+.v-content ol {
+  padding-left: 20px;
+}
+
+.v-content ol li {
+  margin-bottom: 10px;
+  line-height: 1.5;
+  color: #495057;
+}
+
+/* Remove the old instruction styling that's no longer needed */
+.instructions-panel, .show-instructions-btn, .close-instructions-btn {
+  display: none;
+}
 
 /* Responsive Design - Large Screens */
 @media screen and (max-width: 1200px) {
