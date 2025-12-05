@@ -1,0 +1,141 @@
+{
+  "version": 2.0,
+  "questions": [
+    {
+      "question": "What does outage probability represent in wireless communication?",
+      "answers": {
+        "a": "The likelihood that a transmitter will fail",
+        "b": "The probability that the received signal falls below a minimum threshold",
+        "c": "The probability of achieving maximum signal quality",
+        "d": "The average power of the transmitted signal"
+      },
+      "explanations": {
+        "a": "Incorrect – this refers to hardware reliability, not signal performance.",
+        "b": "Correct – outage probability is the chance the received signal is below a set threshold.",
+        "c": "Incorrect – this is unrelated to outage probability definition.",
+        "d": "Incorrect – outage probability is not about average transmitted power."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "What is the coverage area in a wireless communication system?",
+      "answers": {
+        "a": "The area where a signal can be received with acceptable quality",
+        "b": "The area within a transmitter’s physical boundary",
+        "c": "The area where all users have maximum signal strength",
+        "d": "The area beyond which the signal strength is zero"
+      },
+      "explanations": {
+        "a": "Correct – coverage area is where signal meets minimum quality requirements.",
+        "b": "Incorrect – physical boundary does not define RF coverage.",
+        "c": "Incorrect – not all locations have maximum signal.",
+        "d": "Incorrect – some signal may still be present beyond coverage area."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "Outage probability depends on which of the following?",
+      "answers": {
+        "a": "Target minimum received power",
+        "b": "Distance between transmitter and receiver",
+        "c": "Both A and B",
+        "d": "None of the above"
+      },
+      "explanations": {
+        "a": "Partially correct – but not the only factor.",
+        "b": "Partially correct – but not the only factor.",
+        "c": "Correct – both the target threshold and distance affect outage probability.",
+        "d": "Incorrect – these factors clearly matter."
+      },
+      "correctAnswer": "c",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "If a cell has a low outage probability, which of the following is likely true?",
+      "answers": {
+        "a": "The cell has poor signal coverage",
+        "b": "The cell provides consistent signal quality",
+        "c": "Users frequently experience dropped calls",
+        "d": "The cell requires additional transmitters"
+      },
+      "explanations": {
+        "a": "Incorrect – low outage means better coverage.",
+        "b": "Correct – low outage means fewer drops and stable performance.",
+        "c": "Incorrect – high outage probability would cause dropped calls.",
+        "d": "Incorrect – low outage does not indicate lack of transmitters."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "Which of the following is a common method to improve coverage in a wireless network?",
+      "answers": {
+        "a": "Increase transmit power",
+        "b": "Reduce antenna height",
+        "c": "Use higher frequency bands",
+        "d": "Increase outage probability"
+      },
+      "explanations": {
+        "a": "Correct – more power extends range and improves coverage.",
+        "b": "Incorrect – lower antennas reduce coverage.",
+        "c": "Incorrect – higher frequencies suffer higher pathloss.",
+        "d": "Incorrect – higher outage probability means worse coverage."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "In practical systems, outage probability is often reduced by:",
+      "answers": {
+        "a": "Deploying more base stations",
+        "b": "Using smaller antennas",
+        "c": "Reducing the number of users",
+        "d": "Increasing system noise"
+      },
+      "explanations": {
+        "a": "Correct – more base stations reduce distance and improve coverage.",
+        "b": "Incorrect – smaller antennas usually reduce gain.",
+        "c": "Incorrect – while less load helps, it doesn’t directly reduce outage probability.",
+        "d": "Incorrect – more noise makes performance worse."
+      },
+      "correctAnswer": "a",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "A higher target signal-to-noise ratio (SNR) threshold generally leads to:",
+      "answers": {
+        "a": "Lower outage probability",
+        "b": "Higher outage probability",
+        "c": "No change in outage probability",
+        "d": "Improved coverage area"
+      },
+      "explanations": {
+        "a": "Incorrect – higher threshold means it’s harder to meet the requirement.",
+        "b": "Correct – higher SNR target increases the chance of outage.",
+        "c": "Incorrect – SNR threshold affects outage probability.",
+        "d": "Incorrect – higher threshold usually reduces coverage."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "Which environment is most likely to have smaller coverage for the same transmit power?",
+      "answers": {
+        "a": "Open rural area",
+        "b": "Dense urban area",
+        "c": "Suburban area",
+        "d": "Indoor open hall"
+      },
+      "explanations": {
+        "a": "Incorrect – rural areas usually have larger coverage.",
+        "b": "Correct – dense urban areas have more obstructions and higher pathloss.",
+        "c": "Incorrect – suburban areas usually have moderate coverage.",
+        "d": "Incorrect – indoor hall coverage depends heavily on building materials."
+      },
+      "correctAnswer": "b",
+      "difficulty": "beginner"
+    }
+  ]
+}
