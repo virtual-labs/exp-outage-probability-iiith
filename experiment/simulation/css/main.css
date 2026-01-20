@@ -419,6 +419,20 @@
   margin-bottom: 10px;
   line-height: 1.5;
   color: #495057;
+  /* Add transition for smooth highlighting */
+  transition: all 0.3s ease;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+/* ADD THIS NEW CLASS */
+.active-instruction {
+  background-color: #e3f2fd; /* Light blue background */
+  border-left: 5px solid #007bff; /* Accent border */
+  font-weight: 700; /* Bold text */
+  color: #0056b3 !important; /* Darker blue text */
+  transform: translateX(5px); /* Slight shift to the right */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 /* Remove the old instruction styling that's no longer needed */

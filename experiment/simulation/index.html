@@ -23,13 +23,13 @@
 			<br>
 			<h3>
 				<ol>
-					<li>Use the <strong>System Parameters</strong> panel to configure the wireless environment (transmitter power, frequency, noise floor, etc.)</li>
-					<li>Choose obstacle placement method: Manual (click on grid cells) or Generate Layout (random distribution)</li>
-					<li>For manual mode, select click mode (Normal/Heavy/Erase) and place obstacles by clicking on grid cells</li>
-					<li>Observe signal strength visualization: green indicates strong signal, yellow is medium, and red is weak</li>
-					<li>Cells with red borders indicate "outage" regions where signal is too weak to maintain connection</li>
-					<li>Analyze the coverage metrics, signal analysis, and path loss data in the Results & Analysis panel</li>
-					<li>Try different environment types and obstacle patterns to understand their impact on outage probability</li>
+                    <li id="sim-step-1">Use the <strong>System Parameters</strong> panel to configure the wireless environment (transmitter power, frequency, noise floor, etc.)</li>
+					<li id="sim-step-2">Choose obstacle placement method: Manual (click on grid cells) or Generate Layout (random distribution)</li>
+					<li id="sim-step-3">For manual mode, select click mode (Normal/Heavy/Erase) and place obstacles by clicking on grid cells</li>
+					<li id="sim-step-4">Observe signal strength visualization: green indicates strong signal, yellow is medium, and red is weak</li>
+					<li id="sim-step-5">Cells with red borders indicate "outage" regions where signal is too weak to maintain connection</li>
+					<li id="sim-step-6">Analyze the coverage metrics, signal analysis, and path loss data in the Results & Analysis panel</li>
+					<li id="sim-step-7">Try different environment types and obstacle patterns to understand their impact on outage probability</li>
 				</ol>
 			</h3>
 			<br>
@@ -54,7 +54,29 @@
  <div id="simulation-outputs-column" class="column"></div>
  </div>
  
- <div id="analysis-page" class="page-content">
+<div class="page-container">
+ <div id="simulation-page" class="page-content active">
+	<div class="v-collapsible-instruction-container v-instruction-container" >
+		<div class="v-collapsible is-size-5">Instructions</div>
+		<div class="v-content" style="text-align: left; padding-left: 10%; padding-right: 10%;">
+			<h3><b>To understand Outage Probability Analysis, please follow the following steps:</b></h3>
+			<br>
+			<h3>
+				<ol>
+                    <li id="sim-step-1">Use the <strong>System Parameters</strong> panel to configure the wireless environment (transmitter power, frequency, noise floor, etc.)</li>
+					<li id="sim-step-2">Choose obstacle placement method: Manual (click on grid cells) or Generate Layout (random distribution)</li>
+					<li id="sim-step-3">For manual mode, select click mode (Normal/Heavy/Erase) and place obstacles by clicking on grid cells</li>
+					<li id="sim-step-4">Observe signal strength visualization: green indicates strong signal, yellow is medium, and red is weak</li>
+					<li id="sim-step-5">Cells with red borders indicate "outage" regions where signal is too weak to maintain connection</li>
+					<li id="sim-step-6">Analyze the coverage metrics, signal analysis, and path loss data in the Results & Analysis panel</li>
+					<li id="sim-step-7">Try different environment types and obstacle patterns to understand their impact on outage probability</li>
+				</ol>
+			</h3>
+			<br>
+		</div>
+	</div>
+	
+<div id="analysis-page" class="page-content">
 	<div class="v-collapsible-instruction-container v-instruction-container">
 		<div class="v-collapsible is-size-5">Instructions</div>
 		<div class="v-content" style="text-align: left; padding-left: 10%; padding-right: 10%;">
@@ -62,13 +84,13 @@
 			<br>
 			<h3>
 				<ol>
-					<li>Select a chart type from the dropdown menu to visualize different signal propagation characteristics</li>
-					<li>Observe "SNR vs Distance" to understand how signal-to-noise ratio degrades with distance from transmitter</li>
-					<li>View "Received Power vs Distance" to analyze power decay across the coverage area</li>
-					<li>Examine "Path Loss vs Distance" to see total signal attenuation including obstacles and environment factors</li>
-					<li>Study "P(outage) vs SNR Threshold" to understand the probability of outage at various signal quality levels</li>
-					<li>Notice how obstacles and environment settings from the simulation tab directly affect these plots</li>
-					<li>Compare data points to identify areas with good coverage versus outage zones</li>
+                    <li id="ana-step-1">Select a chart type from the dropdown menu to visualize different signal propagation characteristics</li>
+					<li id="ana-step-2">Observe "SNR vs Distance" to understand how signal-to-noise ratio degrades with distance from transmitter</li>
+					<li id="ana-step-3">View "Received Power vs Distance" to analyze power decay across the coverage area</li>
+					<li id="ana-step-4">Examine "Path Loss vs Distance" to see total signal attenuation including obstacles and environment factors</li>
+					<li id="ana-step-5">Study "P(outage) vs SNR Threshold" to understand the probability of outage at various signal quality levels</li>
+					<li id="ana-step-6">Notice how obstacles and environment settings from the simulation tab directly affect these plots</li>
+					<li id="ana-step-7">Compare data points to identify areas with good coverage versus outage zones</li>
 				</ol>
 			</h3>
 			<br>

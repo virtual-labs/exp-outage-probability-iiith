@@ -29,6 +29,23 @@ function initialize() {
   // Add mobile grid adjustment
   adjustGridForMobile();
   window.addEventListener('resize', adjustGridForMobile);
+
+  // ADDED: Initialize first instruction highlight
+  highlightInstruction('sim-step-1');
+}
+
+// ADDED: Helper function to highlight instructions
+function highlightInstruction(stepId) {
+  // Remove active class from all list items in both instruction sets
+  document.querySelectorAll('.v-content ol li').forEach(li => {
+    li.classList.remove('active-instruction');
+  });
+
+  // Add active class to the specific step
+  const step = document.getElementById(stepId);
+  if (step) {
+    step.classList.add('active-instruction');
+  }
 }
 
 // Add this function to ensure proper grid display on mobile
@@ -67,6 +84,10 @@ function switchMainTask(taskName) {
     // Hide plot controls
     const plotControls = document.querySelector('.plot-controls');
     if (plotControls) plotControls.style.display = 'none';
+
+  // ADDED: Reset to Step 1 when entering Simulation
+  highlightInstruction('sim-step-1');
+  
   } else { // 'analysis'
     analysisInputsContainer.appendChild(inputsPanel);
     // Don't append chartStatsPanel since it no longer exists
@@ -76,6 +97,11 @@ function switchMainTask(taskName) {
     setTimeout(() => {
         if(analysisChart) analysisChart.resize();
     }, 10);
+
+    // ADDED: Reset to Step 1 when entering Analysis
+    highlightInstruction('ana-step-1');
+    // Or immediately check current chart type
+    updateChart();
   }
 }
 
@@ -182,11 +208,16 @@ function toggleObstacleInputs() {
   const method = document.getElementById('obstacleMethod').value;
   const manualInputs = document.getElementById('manual-inputs');
   const generateInputs = document.getElementById('generate-inputs');
+
+  // ADDED: Highlight Step 2 (Method Selection) immediately
+  highlightInstruction('sim-step-2');
   
   if (method === 'manual') {
     manualInputs.style.display = 'block';
     generateInputs.style.display = 'none';
     isManualMode = true;
+    // ADDED: Guide user to Step 3 after a short delay or immediately
+    setTimeout(() => highlightInstruction('sim-step-3'), 1000);
   } else { // 'generate'
     manualInputs.style.display = 'none';
     generateInputs.style.display = 'block';
@@ -490,6 +521,9 @@ function handleCellClick(row, col) {
   // MODIFIED: This function now requires isManualMode to be true
   if (!isManualMode || (row === transmitter.y && col === transmitter.x)) return;
 
+  // ADDED: Highlight Step 3 (Manual placement)
+  highlightInstruction('sim-step-3');
+
   const cell = cells[row][col];
   const cellElement = cell.element;
   cellElement.classList.remove('obstacle-normal', 'obstacle-heavy', 'outage-cell', 'shadowed-cell');
@@ -595,6 +629,20 @@ function setupInputListeners() {
   const inputsToWatch = ['Pt', 'Pmin', 'frequency', 'setting', 'noiseFloor']; 
   inputsToWatch.forEach(id => {
     const element = document.getElementById(id);
+
+    // ADDED: Highlight Step 1 (System Params) when these change
+    element.addEventListener('focus', () => {
+         if(document.getElementById('simulation-page').classList.contains('active')) {
+            highlightInstruction('sim-step-1');
+         }
+    });
+    element.addEventListener('input', () => {
+         if(document.getElementById('simulation-page').classList.contains('active')) {
+             if (id === 'setting') highlightInstruction('sim-step-7'); // Environment setting links to Step 7
+             else highlightInstruction('sim-step-1');
+         }
+    });
+
     element.addEventListener('change', updatePathlossAndMetrics);
     if (element.type === 'number') element.addEventListener('input', updatePathlossAndMetrics);
   });
@@ -624,6 +672,18 @@ function updateChart() {
   if (!analysisChart) { initializeChart(); if (!analysisChart) return; }
  
   const chartType = document.getElementById('chartType').value;
+
+  // ADDED: Logic to highlight specific Analysis instructions based on chart type
+  if (document.getElementById('analysis-page').classList.contains('active')) {
+      switch(chartType) {
+          case 'snr-distance': highlightInstruction('ana-step-2'); break;
+          case 'power-distance': highlightInstruction('ana-step-3'); break;
+          case 'pathloss-distance': highlightInstruction('ana-step-4'); break;
+          case 'pout-snr': highlightInstruction('ana-step-5'); break;
+          default: highlightInstruction('ana-step-1');
+      }
+  }
+  
   const noiseFloor = parseFloat(document.getElementById('noiseFloor').value);
   const Pt = parseFloat(document.getElementById('Pt').value);
   const frequency = parseFloat(document.getElementById('frequency').value);
