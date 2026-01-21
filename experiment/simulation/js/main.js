@@ -5,47 +5,91 @@ let simInputsContainer, simOutputsContainer, analysisInputsContainer, analysisOu
 // ADDED: New global variable to track the mode
 let isManualMode = true;
 
-function initialize() {
-  inputsPanel = document.getElementById('inputs-panel');
-  outputsPanel = document.getElementById('outputs-panel');
-  chartStatsPanel = document.getElementById('chart-stats-panel');
-  panelHolder = document.getElementById('panel-holder');
-  
-  simInputsContainer = document.getElementById('simulation-inputs-column');
-  simOutputsContainer = document.getElementById('simulation-outputs-column');
-  analysisInputsContainer = document.getElementById('analysis-inputs-column');
-  analysisOutputsContainer = document.getElementById('analysis-outputs-column');
+// Track instruction progress - MUST BE GLOBAL
+let currentSimulationStep = 1;
+let currentAnalysisStep = 1;
+let completedSimulationSteps = new Set();
+let completedAnalysisSteps = new Set();
 
-  createGrid(); 
-  setupInputListeners();
-  setMode('normal'); 
-  switchMainTask('simulation'); 
-  updatePathlossAndMetrics();
-  loadChartJS();
-  
-  // ADDED: Initial call to set up the correct UI based on the default method
-  toggleObstacleInputs();
-
-  // Add mobile grid adjustment
-  adjustGridForMobile();
-  window.addEventListener('resize', adjustGridForMobile);
-
-  // ADDED: Initialize first instruction highlight
-  highlightInstruction('sim-step-1');
+function highlightInstruction(step, pageType = 'simulation') {
+    const instructionList = document.getElementById(`${pageType}-instructions`);
+    if (!instructionList) return;
+    
+    const instructions = instructionList.querySelectorAll('li');
+    
+    instructions.forEach((li, index) => {
+        const stepNum = index + 1;
+        li.classList.remove('instruction-active');
+        
+        if (pageType === 'simulation') {
+            if (completedSimulationSteps.has(stepNum)) {
+                li.classList.add('instruction-completed');
+            } else {
+                li.classList.remove('instruction-completed');
+            }
+        } else {
+            if (completedAnalysisSteps.has(stepNum)) {
+                li.classList.add('instruction-completed');
+            } else {
+                li.classList.remove('instruction-completed');
+            }
+        }
+    });
+    
+    if (step > 0 && step <= instructions.length) {
+        instructions[step - 1].classList.add('instruction-active');
+        setTimeout(() => {
+            instructions[step - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    }
 }
 
-// ADDED: Helper function to highlight instructions
-function highlightInstruction(stepId) {
-  // Remove active class from all list items in both instruction sets
-  document.querySelectorAll('.v-content ol li').forEach(li => {
-    li.classList.remove('active-instruction');
-  });
+function markStepComplete(step, pageType = 'simulation') {
+    if (pageType === 'simulation') {
+        completedSimulationSteps.add(step);
+        if (step < 7) {
+            currentSimulationStep = step + 1;
+            highlightInstruction(currentSimulationStep, 'simulation');
+        } else {
+            highlightInstruction(step, 'simulation');
+        }
+    } else {
+        completedAnalysisSteps.add(step);
+        if (step < 7) {
+            currentAnalysisStep = step + 1;
+            highlightInstruction(currentAnalysisStep, 'analysis');
+        } else {
+            highlightInstruction(step, 'analysis');
+        }
+    }
+}
 
-  // Add active class to the specific step
-  const step = document.getElementById(stepId);
-  if (step) {
-    step.classList.add('active-instruction');
-  }
+function initialize() {
+    inputsPanel = document.getElementById('inputs-panel');
+    outputsPanel = document.getElementById('outputs-panel');
+    chartStatsPanel = document.getElementById('chart-stats-panel');
+    panelHolder = document.getElementById('panel-holder');
+    
+    simInputsContainer = document.getElementById('simulation-inputs-column');
+    simOutputsContainer = document.getElementById('simulation-outputs-column');
+    analysisInputsContainer = document.getElementById('analysis-inputs-column');
+    analysisOutputsContainer = document.getElementById('analysis-outputs-column');
+
+    createGrid(); 
+    setupInputListeners();
+    setMode('normal'); 
+    switchMainTask('simulation'); 
+    updatePathlossAndMetrics();
+    loadChartJS();
+    
+    toggleObstacleInputs();
+    adjustGridForMobile();
+    window.addEventListener('resize', adjustGridForMobile);
+    
+    // Start highlighting after a brief delay
+    setTimeout(() => {
+        highlightInstruction(1, 'simulation');
+    }, 500);
 }
 
 // Add this function to ensure proper grid display on mobile
@@ -68,41 +112,30 @@ function adjustGridForMobile() {
 }
 
 function switchMainTask(taskName) {
-  document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
-  document.querySelectorAll('.main-task-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+    document.querySelectorAll('.main-task-btn').forEach(btn => btn.classList.remove('active'));
 
-  panelHolder.appendChild(inputsPanel);
-  panelHolder.appendChild(outputsPanel);
-  // Remove chartStatsPanel line
+    panelHolder.appendChild(inputsPanel);
+    panelHolder.appendChild(outputsPanel);
 
-  document.getElementById(taskName + '-page').classList.add('active');
-  document.getElementById(taskName + '-task-btn').classList.add('active');
+    document.getElementById(taskName + '-page').classList.add('active');
+    document.getElementById(taskName + '-task-btn').classList.add('active');
 
-  if (taskName === 'simulation') {
-    simInputsContainer.appendChild(inputsPanel);
-    simOutputsContainer.appendChild(outputsPanel);
-    // Hide plot controls
-    const plotControls = document.querySelector('.plot-controls');
-    if (plotControls) plotControls.style.display = 'none';
-
-  // ADDED: Reset to Step 1 when entering Simulation
-  highlightInstruction('sim-step-1');
-  
-  } else { // 'analysis'
-    analysisInputsContainer.appendChild(inputsPanel);
-    // Don't append chartStatsPanel since it no longer exists
-    // Show plot controls
-    const plotControls = document.querySelector('.plot-controls');
-    if (plotControls) plotControls.style.display = 'block';
-    setTimeout(() => {
-        if(analysisChart) analysisChart.resize();
-    }, 10);
-
-    // ADDED: Reset to Step 1 when entering Analysis
-    highlightInstruction('ana-step-1');
-    // Or immediately check current chart type
-    updateChart();
-  }
+    if (taskName === 'simulation') {
+        simInputsContainer.appendChild(inputsPanel);
+        simOutputsContainer.appendChild(outputsPanel);
+        const plotControls = document.querySelector('.plot-controls');
+        if (plotControls) plotControls.style.display = 'none';
+        highlightInstruction(currentSimulationStep, 'simulation');
+    } else {
+        analysisInputsContainer.appendChild(inputsPanel);
+        const plotControls = document.querySelector('.plot-controls');
+        if (plotControls) plotControls.style.display = 'block';
+        highlightInstruction(currentAnalysisStep, 'analysis');
+        setTimeout(() => {
+            if(analysisChart) analysisChart.resize();
+        }, 10);
+    }
 }
 
 const originalUpdatePathlossAndMetrics = updatePathlossAndMetrics;
@@ -518,21 +551,29 @@ function updateMetricDisplays(metrics) {
 }
 
 function handleCellClick(row, col) {
-  // MODIFIED: This function now requires isManualMode to be true
-  if (!isManualMode || (row === transmitter.y && col === transmitter.x)) return;
+    if (!isManualMode || (row === transmitter.y && col === transmitter.x)) return;
 
-  // ADDED: Highlight Step 3 (Manual placement)
-  highlightInstruction('sim-step-3');
-
-  const cell = cells[row][col];
-  const cellElement = cell.element;
-  cellElement.classList.remove('obstacle-normal', 'obstacle-heavy', 'outage-cell', 'shadowed-cell');
-  cellElement.style.removeProperty('--shadow-alpha'); 
-  cellElement.style.backgroundColor = ''; 
-  if (currentMode === 'erase' || cell.obstacleType === currentMode) cell.obstacleType = null;
-  else if (currentMode === 'normal') { cell.obstacleType = 'normal'; cellElement.classList.add('obstacle-normal'); }
-  else if (currentMode === 'heavy') { cell.obstacleType = 'heavy'; cellElement.classList.add('obstacle-heavy'); }
-  updatePathlossAndMetrics();
+    const cell = cells[row][col];
+    const cellElement = cell.element;
+    cellElement.classList.remove('obstacle-normal', 'obstacle-heavy', 'outage-cell', 'shadowed-cell');
+    cellElement.style.removeProperty('--shadow-alpha'); 
+    cellElement.style.backgroundColor = ''; 
+    if (currentMode === 'erase' || cell.obstacleType === currentMode) cell.obstacleType = null;
+    else if (currentMode === 'normal') { cell.obstacleType = 'normal'; cellElement.classList.add('obstacle-normal'); }
+    else if (currentMode === 'heavy') { cell.obstacleType = 'heavy'; cellElement.classList.add('obstacle-heavy'); }
+    
+    updatePathlossAndMetrics();
+    
+    // Track step 4-6 on first obstacle placement
+    if (currentSimulationStep === 4 && cell.obstacleType) {
+        markStepComplete(4, 'simulation');
+        setTimeout(() => {
+            if (currentSimulationStep === 5) markStepComplete(5, 'simulation');
+        }, 2000);
+        setTimeout(() => {
+            if (currentSimulationStep === 6) markStepComplete(6, 'simulation');
+        }, 4000);
+    }
 }
 
 function showTooltip(event, row, col) {
@@ -571,9 +612,14 @@ function showTooltip(event, row, col) {
 
 function hideTooltip() { tooltip.style.display = "none"; }
 function setMode(mode) {
-  currentMode = mode;
-  document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`.mode-btn[onclick="setMode('${mode}')"]`).classList.add('active');
+    currentMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.mode-btn[onclick="setMode('${mode}')"]`).classList.add('active');
+    
+    // Track step 3 completion
+    if (currentSimulationStep === 3) {
+        markStepComplete(3, 'simulation');
+    }
 }
 
 function clearAll() {
@@ -596,58 +642,73 @@ function generatePoisson(mean) {
 }
 
 function randomObstacles() {
-  clearAll();
-  const environment = document.getElementById('setting').value;
-  
-  // Environment-specific Poisson means (scaled for grid size)
-  const environmentMeans = {
-    rural: 20,     // Least obstacles
-    suburban: 50,  // Medium obstacles  
-    urban: 80      // Most obstacles
-  };
-  
-  const meanObstacles = environmentMeans[environment];
-  const numObstaclesToPlace = generatePoisson(meanObstacles);
-  const maxPlaceable = (rows * cols) - 1; // Excluding transmitter cell
-  const numObstacles = Math.min(numObstaclesToPlace, maxPlaceable);
-  
-  for (let i = 0; i < numObstacles; i++) {
-    let r, c;
-    do { 
-      r = Math.floor(Math.random() * rows); 
-      c = Math.floor(Math.random() * cols); 
-    } while ((r === transmitter.y && c === transmitter.x) || cells[r][c].obstacleType);
+    clearAll();
+    const environment = document.getElementById('setting').value;
     
-    const type = Math.random() < 0.7 ? 'normal' : 'heavy';
-    cells[r][c].obstacleType = type;
-    cells[r][c].element.classList.add(type === 'normal' ? 'obstacle-normal' : 'obstacle-heavy');
-  }
-  updatePathlossAndMetrics();
+    const environmentMeans = {
+        rural: 20,
+        suburban: 50,  
+        urban: 80
+    };
+    
+    const meanObstacles = environmentMeans[environment];
+    const numObstaclesToPlace = generatePoisson(meanObstacles);
+    const maxPlaceable = (rows * cols) - 1;
+    const numObstacles = Math.min(numObstaclesToPlace, maxPlaceable);
+    
+    for (let i = 0; i < numObstacles; i++) {
+        let r, c;
+        do { 
+            r = Math.floor(Math.random() * rows); 
+            c = Math.floor(Math.random() * cols); 
+        } while ((r === transmitter.y && c === transmitter.x) || cells[r][c].obstacleType);
+        
+        const type = Math.random() < 0.7 ? 'normal' : 'heavy';
+        cells[r][c].obstacleType = type;
+        cells[r][c].element.classList.add(type === 'normal' ? 'obstacle-normal' : 'obstacle-heavy');
+    }
+    updatePathlossAndMetrics();
+    
+    // Track step 4-6 after generating obstacles
+    if (currentSimulationStep === 4) {
+        markStepComplete(4, 'simulation');
+        setTimeout(() => {
+            if (currentSimulationStep === 5) markStepComplete(5, 'simulation');
+        }, 2000);
+        setTimeout(() => {
+            if (currentSimulationStep === 6) markStepComplete(6, 'simulation');
+        }, 4000);
+    }
 }
 
 function setupInputListeners() {
-  const inputsToWatch = ['Pt', 'Pmin', 'frequency', 'setting', 'noiseFloor']; 
-  inputsToWatch.forEach(id => {
-    const element = document.getElementById(id);
-
-    // ADDED: Highlight Step 1 (System Params) when these change
-    element.addEventListener('focus', () => {
-         if(document.getElementById('simulation-page').classList.contains('active')) {
-            highlightInstruction('sim-step-1');
-         }
+    const inputsToWatch = ['Pt', 'Pmin', 'frequency', 'setting', 'noiseFloor']; 
+    inputsToWatch.forEach(id => {
+        const element = document.getElementById(id);
+        element.addEventListener('change', () => {
+            updatePathlossAndMetrics();
+            // Track step 1 completion
+            if (currentSimulationStep === 1) {
+                markStepComplete(1, 'simulation');
+            }
+        });
+        if (element.type === 'number') {
+            element.addEventListener('input', () => {
+                updatePathlossAndMetrics();
+                if (currentSimulationStep === 1) {
+                    markStepComplete(1, 'simulation');
+                }
+            });
+        }
     });
-    element.addEventListener('input', () => {
-         if(document.getElementById('simulation-page').classList.contains('active')) {
-             if (id === 'setting') highlightInstruction('sim-step-7'); // Environment setting links to Step 7
-             else highlightInstruction('sim-step-1');
-         }
+    
+    // Track obstacle method change (Step 2)
+    document.getElementById('obstacleMethod').addEventListener('change', () => {
+        toggleObstacleInputs();
+        if (currentSimulationStep === 2) {
+            markStepComplete(2, 'simulation');
+        }
     });
-
-    element.addEventListener('change', updatePathlossAndMetrics);
-    if (element.type === 'number') element.addEventListener('input', updatePathlossAndMetrics);
-  });
-  // ADDED: Listener for the new dropdown
-  document.getElementById('obstacleMethod').addEventListener('change', toggleObstacleInputs);
 }
 
 let analysisChart = null;
@@ -670,18 +731,23 @@ function initializeChart() {
 // MODIFICATION: This function now uses the randomized 'pathlossWithFading' for relevant plots.
 function updateChart() {
   if (!analysisChart) { initializeChart(); if (!analysisChart) return; }
+
+  // Track analysis page steps
+  if (currentAnalysisStep === 1) {
+      markStepComplete(1, 'analysis');
+  }
  
   const chartType = document.getElementById('chartType').value;
 
-  // ADDED: Logic to highlight specific Analysis instructions based on chart type
-  if (document.getElementById('analysis-page').classList.contains('active')) {
-      switch(chartType) {
-          case 'snr-distance': highlightInstruction('ana-step-2'); break;
-          case 'power-distance': highlightInstruction('ana-step-3'); break;
-          case 'pathloss-distance': highlightInstruction('ana-step-4'); break;
-          case 'pout-snr': highlightInstruction('ana-step-5'); break;
-          default: highlightInstruction('ana-step-1');
-      }
+  // Track specific chart viewing steps
+  if (currentAnalysisStep === 2 && chartType === 'snr-distance') {
+      setTimeout(() => markStepComplete(2, 'analysis'), 1000);
+  } else if (currentAnalysisStep === 3 && chartType === 'power-distance') {
+      setTimeout(() => markStepComplete(3, 'analysis'), 1000);
+  } else if (currentAnalysisStep === 4 && chartType === 'pathloss-distance') {
+      setTimeout(() => markStepComplete(4, 'analysis'), 1000);
+  } else if (currentAnalysisStep === 5 && chartType === 'pout-snr') {
+      setTimeout(() => markStepComplete(5, 'analysis'), 1000);
   }
   
   const noiseFloor = parseFloat(document.getElementById('noiseFloor').value);
