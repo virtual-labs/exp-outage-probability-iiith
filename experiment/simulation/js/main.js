@@ -241,11 +241,16 @@ function toggleObstacleInputs() {
   const method = document.getElementById('obstacleMethod').value;
   const manualInputs = document.getElementById('manual-inputs');
   const generateInputs = document.getElementById('generate-inputs');
+
+  // ADDED: Highlight Step 2 (Method Selection) immediately
+  highlightInstruction('sim-step-2');
   
   if (method === 'manual') {
     manualInputs.style.display = 'block';
     generateInputs.style.display = 'none';
     isManualMode = true;
+    // ADDED: Guide user to Step 3 after a short delay or immediately
+    setTimeout(() => highlightInstruction('sim-step-3'), 1000);
   } else { // 'generate'
     manualInputs.style.display = 'none';
     generateInputs.style.display = 'block';
