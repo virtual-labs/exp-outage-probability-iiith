@@ -136,6 +136,40 @@
       },
       "correctAnswer": "b",
       "difficulty": "beginner"
+    },
+    {
+      "question": "A cellular provider decides to upgrade the minimum required signal strength (Coverage Threshold) for their network from -90 dBm to -75 dBm to support high-speed video streaming. Assuming the environment and transmitter power remain identical, how will this affect the network's Outage Probability?",
+      "answers": {
+        "a": "It will decrease, because a higher threshold means a stronger network.",
+        "b": "It will increase, because fewer locations will be able to meet the stricter power requirement.",
+        "c": "It will remain exactly the same, as the obstacles haven't moved.",
+        "d": "Outage probability will drop to 0%."
+      },
+      "explanations": {
+        "a": "Incorrect – A higher threshold means the signal must be stronger to avoid an outage, which is harder to achieve.",
+        "b": "Correct – Raising the minimum acceptable threshold means more areas will fail to meet it, thus increasing outage probability.",
+        "c": "Incorrect – The threshold directly dictates the pass/fail criteria for an outage.",
+        "d": "Incorrect – Outage probability will increase, not drop to zero."
+      },
+      "correctAnswer": "b",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "When transitioning a wireless setup from a 'Rural' (Line-of-Sight dominant) to an 'Urban' (High Interference/Blockage) environment, which mathematical parameters in the log-distance path loss model are primarily affected?",
+      "answers": {
+        "a": "The transmitter's inherent operating frequency.",
+        "b": "The path loss exponent and the log-normal fading standard deviation.",
+        "c": "The thermal noise floor of the receiver.",
+        "d": "The speed of light in the medium."
+      },
+      "explanations": {
+        "a": "Incorrect – Operating frequency is an equipment setting, independent of the environment.",
+        "b": "Correct – Urban environments scatter and absorb signals more, directly increasing the path loss exponent and the variance of shadow fading.",
+        "c": "Incorrect – Thermal noise is mostly dependent on hardware temperature and bandwidth.",
+        "d": "Incorrect – The speed of light remains constant in air."
+      },
+      "correctAnswer": "b",
+      "difficulty": "advanced"
     }
   ]
 }
