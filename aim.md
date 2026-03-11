@@ -1,0 +1,1 @@
+The objective of this experiment is to understand the concept of the outage probability and the cell coverage area and how they are affected by the obstacles in the propogation environment and configuration of system parameters such as carrier frequency, transmit power.
