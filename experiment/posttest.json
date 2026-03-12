@@ -136,6 +136,40 @@
       },
       "correctAnswer": "a",
       "difficulty": "beginner"
+    },
+    {
+      "question": "Based on the simulation principles, if you place a cluster of 'Heavy Obstacles' close to the transmitter, how does this specifically alter the 'Received Power vs Distance' plot compared to an empty grid?",
+      "answers": {
+        "a": "The entire curve shifts upward uniformly.",
+        "b": "The curve exhibits sudden, sharp downward spikes (deep fades) at the specific distances where the shadows fall.",
+        "c": "The plot becomes a perfectly straight horizontal line.",
+        "d": "The distance axis compresses, making the grid appear smaller."
+      },
+      "explanations": {
+        "a": "Incorrect – Obstacles cause signal loss, not signal gain.",
+        "b": "Correct – Heavy obstacles introduce severe, localized shadow fading, appearing as deep dips or spikes in the received power plot at the affected distances.",
+        "c": "Incorrect – Power naturally decays over distance; it never remains perfectly horizontal.",
+        "d": "Incorrect – Distance scales are fixed; only the power (Y-axis) values change."
+      },
+      "correctAnswer": "b",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "You run a simulation in an Urban setting and observe an Outage Probability of 35%. You cannot remove the obstacles or change the environment. Which of the following technical adjustments is the most mathematically effective way to reduce the outage probability below 15%?",
+      "answers": {
+        "a": "Increase the required Coverage Threshold (Pmin) from -85 dBm to -70 dBm.",
+        "b": "Increase the Transmit Power (Pt) and lower the Coverage Threshold (Pmin).",
+        "c": "Increase the operating frequency from 900 MHz to 5000 MHz.",
+        "d": "Change the grid calculation to ignore shadowing effects."
+      },
+      "explanations": {
+        "a": "Incorrect – Increasing the threshold makes it harder to meet, increasing outage.",
+        "b": "Correct – Increasing Pt boosts the signal everywhere, and lowering Pmin makes the network more tolerant of weak signals, both drastically reducing outage.",
+        "c": "Incorrect – Higher frequencies experience greater path loss, which would worsen the outage.",
+        "d": "Incorrect – Ignoring shadowing invalidates the simulation's accuracy; it doesn't solve the physical problem."
+      },
+      "correctAnswer": "b",
+      "difficulty": "advanced"
     }
   ]
 }
