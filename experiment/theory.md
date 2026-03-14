@@ -12,7 +12,6 @@ More generally, wireless link reliability is determined not only by received pow
 
 Outage probability is a critical metric in wireless communication systems, representing the likelihood that the received signal power at a certain distance falls below a specified threshold, making the communication link unreliable. In practical terms, it quantifies the probability that a user will experience poor connectivity or dropped calls.
 
-<span style="color:blue">
 
 Formally, outage can be expressed as:
 
